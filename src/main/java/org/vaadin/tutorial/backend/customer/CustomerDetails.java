@@ -3,6 +3,7 @@ package org.vaadin.tutorial.backend.customer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.Nullable;
+import org.vaadin.tutorial.backend.pickuppoint.PickupPointId;
 import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
 /**
@@ -36,6 +37,8 @@ public class CustomerDetails {
     @NotNull(groups = OnSave.class, message = "Phone is required")
     private @Nullable PhoneNumber phone;
 
+    private @Nullable PickupPointId preferredPickupPointId;
+
     public CustomerDetails() {
     }
 
@@ -46,6 +49,7 @@ public class CustomerDetails {
         this.lastName = original.lastName;
         this.email = original.email;
         this.phone = original.phone;
+        this.preferredPickupPointId = original.preferredPickupPointId;
     }
 
     public @Nullable CustomerId getCustomerId() {
@@ -94,5 +98,13 @@ public class CustomerDetails {
 
     public void setPhone(@Nullable PhoneNumber phone) {
         this.phone = phone;
+    }
+
+    public @Nullable PickupPointId getPreferredPickupPointId() {
+        return preferredPickupPointId;
+    }
+
+    public void setPreferredPickupPointId(@Nullable PickupPointId preferredPickupPointId) {
+        this.preferredPickupPointId = preferredPickupPointId;
     }
 }
