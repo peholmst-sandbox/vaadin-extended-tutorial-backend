@@ -173,20 +173,18 @@ public class ProductCatalogService {
         return stream;
     }
 
-    private static boolean contains(String value, String term) {
+    private static boolean contains(@Nullable String value, String term) {
         return value != null && value.toLowerCase(Locale.ROOT).contains(term);
     }
 
     private static Comparator<ProductDetails> buildComparator(List<SortOrder> sortOrders) {
         Comparator<ProductDetails> comparator = null;
         for (var sortOrder : sortOrders) {
-            for (var property : sortOrder.properties()) {
-                Comparator<ProductDetails> propertyComparator = propertyComparator(property);
-                if (sortOrder.isDescending()) {
-                    propertyComparator = propertyComparator.reversed();
-                }
-                comparator = comparator == null ? propertyComparator : comparator.thenComparing(propertyComparator);
+            Comparator<ProductDetails> propertyComparator = propertyComparator(sortOrder.property());
+            if (sortOrder.direction() == SortOrder.Direction.DESCENDING) {
+                propertyComparator = propertyComparator.reversed();
             }
+            comparator = comparator == null ? propertyComparator : comparator.thenComparing(propertyComparator);
         }
         return comparator != null ? comparator : Comparator.comparing(p -> p.getProductId().id());
     }
