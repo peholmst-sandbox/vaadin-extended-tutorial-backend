@@ -4,14 +4,14 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
-public record Query<F>(
+public record Query<F, S>(
         @Nullable F filter,
         int offset,
         int limit,
-        List<SortOrder> sortOrders
+        List<SortOrder<S>> sortOrders
 ) {
 
-    public Query(@Nullable F filter, int offset, int limit, List<SortOrder> sortOrders) {
+    public Query(@Nullable F filter, int offset, int limit, List<SortOrder<S>> sortOrders) {
         this.filter = filter;
         this.offset = offset;
         this.limit = limit;

@@ -86,7 +86,7 @@ public class ProductCatalogService {
         return artificialDelay;
     }
 
-    public List<ProductCatalogItem> findItems(Query<ProductFilter> query) {
+    public List<ProductCatalogItem> findItems(Query<ProductFilter, ProductSortProperty> query) {
         simulateDelay();
         return filteredStream(query.filter())
                 .sorted(buildComparator(query.sortOrders()))
@@ -96,7 +96,7 @@ public class ProductCatalogService {
                 .toList();
     }
 
-    public int countItems(Query<ProductFilter> query) {
+    public int countItems(Query<ProductFilter, ProductSortProperty> query) {
         simulateDelay();
         return (int) filteredStream(query.filter()).count();
     }
@@ -177,7 +177,7 @@ public class ProductCatalogService {
         return value != null && value.toLowerCase(Locale.ROOT).contains(term);
     }
 
-    private static Comparator<ProductDetails> buildComparator(List<SortOrder> sortOrders) {
+    private static Comparator<ProductDetails> buildComparator(List<SortOrder<ProductSortProperty>> sortOrders) {
         Comparator<ProductDetails> comparator = null;
         for (var sortOrder : sortOrders) {
             Comparator<ProductDetails> propertyComparator = propertyComparator(sortOrder.property());
@@ -190,22 +190,21 @@ public class ProductCatalogService {
     }
 
     @SuppressWarnings("unchecked")
-    private static Comparator<ProductDetails> propertyComparator(String property) {
+    private static Comparator<ProductDetails> propertyComparator(ProductSortProperty property) {
         return Comparator.comparing(p -> (Comparable<Object>) getProperty(p, property), Comparator.nullsLast(Comparator.naturalOrder()));
     }
 
-    private static Comparable<?> getProperty(ProductDetails product, String property) {
+    private static Comparable<?> getProperty(ProductDetails product, ProductSortProperty property) {
         return switch (property) {
-            case "name" -> product.getName();
-            case "description" -> product.getDescription();
-            case "category" -> product.getCategory();
-            case "brand" -> product.getBrand();
-            case "sku" -> product.getSku();
-            case "releaseDate" -> product.getReleaseDate();
-            case "price" -> product.getPrice() != null ? product.getPrice().amount() : null;
-            case "discount" -> product.getDiscount() != null ? product.getDiscount().amount() : null;
-            case "productId" -> product.getProductId() != null ? product.getProductId().id() : null;
-            default -> throw new IllegalArgumentException("Unknown sort property: " + property);
+            case NAME -> product.getName();
+            case DESCRIPTION -> product.getDescription();
+            case CATEGORY -> product.getCategory();
+            case BRAND -> product.getBrand();
+            case SKU -> product.getSku();
+            case RELEASE_DATE -> product.getReleaseDate();
+            case PRICE -> product.getPrice() != null ? product.getPrice().amount() : null;
+            case DISCOUNT -> product.getDiscount() != null ? product.getDiscount().amount() : null;
+            case PRODUCT_ID -> product.getProductId() != null ? product.getProductId().id() : null;
         };
     }
 

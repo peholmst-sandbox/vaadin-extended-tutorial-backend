@@ -147,7 +147,7 @@ class ProductCatalogServiceTest {
 
     @Test
     void findItems_returnsItems() {
-        var query = new Query<ProductFilter>(null, 0, 10, List.of());
+        var query = new Query<ProductFilter, ProductSortProperty>(null, 0, 10, List.of());
 
         var items = service.findItems(query);
 
@@ -156,7 +156,7 @@ class ProductCatalogServiceTest {
 
     @Test
     void countItems_returnsCount() {
-        var query = new Query<ProductFilter>(null, 0, 10, List.of());
+        var query = new Query<ProductFilter, ProductSortProperty>(null, 0, 10, List.of());
 
         var count = service.countItems(query);
 
