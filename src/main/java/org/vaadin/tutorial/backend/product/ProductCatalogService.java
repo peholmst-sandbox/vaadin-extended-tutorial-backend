@@ -1,6 +1,8 @@
 package org.vaadin.tutorial.backend.product;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
+import org.vaadin.tutorial.backend.data.DataIntegrityViolationException;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;
 import org.vaadin.tutorial.backend.data.SortOrder;
@@ -70,7 +72,7 @@ public class ProductCatalogService {
 
     private final ConcurrentHashMap<ProductId, ProductDetails> products = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
-    private volatile Duration artificialDelay = Duration.ZERO;
+    private volatile Duration artificialDelay = Duration.ofMillis(200);
 
     public ProductCatalogService() {
         generateTestData();
@@ -119,6 +121,7 @@ public class ProductCatalogService {
     }
 
     private ProductDetails insert(ProductDetails productDetails) {
+        checkForDuplicateSku(productDetails.getSku(), null);
         var id = new ProductId(nextId.getAndIncrement());
         var saved = new ProductDetails(productDetails);
         saved.setProductId(id);
@@ -128,6 +131,7 @@ public class ProductCatalogService {
     }
 
     private ProductDetails update(ProductDetails productDetails) {
+        checkForDuplicateSku(productDetails.getSku(), productDetails.getProductId());
         var result = products.compute(productDetails.getProductId(), (id, existing) -> {
             if (existing == null) {
                 throw new NoSuchElementException("Product not found: " + id);
@@ -141,6 +145,17 @@ public class ProductCatalogService {
             return updated;
         });
         return new ProductDetails(result);
+    }
+
+    private void checkForDuplicateSku(@Nullable String sku, @Nullable ProductId excludeId) {
+        if (sku == null) {
+            return;
+        }
+        boolean duplicateExists = products.values().stream()
+                .anyMatch(p -> sku.equals(p.getSku()) && !p.getProductId().equals(excludeId));
+        if (duplicateExists) {
+            throw new DataIntegrityViolationException("SKU already exists: " + sku);
+        }
     }
 
     private Stream<ProductDetails> filteredStream(ProductFilter filter) {

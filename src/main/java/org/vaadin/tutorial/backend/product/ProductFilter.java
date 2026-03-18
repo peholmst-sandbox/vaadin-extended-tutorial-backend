@@ -1,4 +1,6 @@
 package org.vaadin.tutorial.backend.product;
 
-public record ProductFilter(String searchTerm) {
+import org.jspecify.annotations.Nullable;
+
+public record ProductFilter(@Nullable String searchTerm) {
 }
