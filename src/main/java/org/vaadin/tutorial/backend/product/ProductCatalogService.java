@@ -158,7 +158,7 @@ public class ProductCatalogService {
         }
     }
 
-    private Stream<ProductDetails> filteredStream(ProductFilter filter) {
+    private Stream<ProductDetails> filteredStream(@Nullable ProductFilter filter) {
         var stream = products.values().stream();
         if (filter != null && filter.searchTerm() != null && !filter.searchTerm().isBlank()) {
             var term = filter.searchTerm().toLowerCase(Locale.ROOT);
