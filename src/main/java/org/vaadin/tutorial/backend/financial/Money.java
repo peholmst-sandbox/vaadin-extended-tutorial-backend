@@ -36,6 +36,16 @@ public record Money(BigDecimal amount) {
     }
 
     /**
+     * Multiplies this amount by the given quantity.
+     *
+     * @param quantity the quantity to multiply by
+     * @return a new Money instance with the multiplied amount
+     */
+    public Money multiply(int quantity) {
+        return new Money(amount.multiply(BigDecimal.valueOf(quantity), MATH_CONTEXT));
+    }
+
+    /**
      * Returns the string representation of the amount.
      *
      * @return the amount as a string with {@value #SCALE} decimal places
