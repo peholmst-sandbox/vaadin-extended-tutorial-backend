@@ -3,10 +3,11 @@ package org.vaadin.tutorial.backend.order;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.vaadin.tutorial.backend.common.EmailAddress;
+import org.vaadin.tutorial.backend.common.PhoneNumber;
+import org.vaadin.tutorial.backend.common.Quantity;
 import org.vaadin.tutorial.backend.customer.CustomerDetails;
 import org.vaadin.tutorial.backend.customer.CustomerService;
-import org.vaadin.tutorial.backend.customer.EmailAddress;
-import org.vaadin.tutorial.backend.customer.PhoneNumber;
 import org.vaadin.tutorial.backend.financial.Money;
 import org.vaadin.tutorial.backend.pickuppoint.GeoCoordinate;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointDetails;
@@ -74,21 +75,21 @@ class OrderPdfServiceTest {
                 "Wireless Headphones",
                 new Money(new BigDecimal("149.99")),
                 new Money(new BigDecimal("20.00")),
-                2
+                new Quantity(2)
         ));
         order.addItem(new OrderItem(
                 new ProductId(2),
                 "USB-C Cable",
                 new Money(new BigDecimal("19.99")),
                 null,
-                3
+                new Quantity(3)
         ));
         order.addItem(new OrderItem(
                 new ProductId(3),
                 "Phone Case Premium Edition",
                 new Money(new BigDecimal("39.99")),
                 new Money(new BigDecimal("5.00")),
-                1
+                new Quantity(1)
         ));
         var savedOrder = orderService.save(order);
 

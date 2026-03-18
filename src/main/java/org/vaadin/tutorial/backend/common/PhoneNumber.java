@@ -1,4 +1,4 @@
-package org.vaadin.tutorial.backend.customer;
+package org.vaadin.tutorial.backend.common;
 
 import java.io.Serializable;
 import java.util.regex.Pattern;

@@ -1,4 +1,4 @@
-package org.vaadin.tutorial.backend.customer;
+package org.vaadin.tutorial.backend.common;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

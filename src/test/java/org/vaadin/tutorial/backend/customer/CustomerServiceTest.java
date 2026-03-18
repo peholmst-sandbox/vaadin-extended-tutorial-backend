@@ -2,6 +2,8 @@ package org.vaadin.tutorial.backend.customer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.vaadin.tutorial.backend.common.EmailAddress;
+import org.vaadin.tutorial.backend.common.PhoneNumber;
 import org.vaadin.tutorial.backend.data.DataIntegrityViolationException;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;

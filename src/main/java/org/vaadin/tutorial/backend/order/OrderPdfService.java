@@ -139,7 +139,7 @@ public class OrderPdfService {
             table.addCell(item.productName());
             table.addCell(formatMoney(item.unitPrice()));
             table.addCell(item.discount() != null ? formatMoney(item.discount()) : "-");
-            table.addCell(String.valueOf(item.quantity()));
+            table.addCell(String.valueOf(item.quantity().value()));
             table.addCell(formatMoney(calculateLineTotal(item)));
         }
 

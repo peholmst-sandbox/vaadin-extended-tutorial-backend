@@ -8,6 +8,7 @@ import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;
 import org.vaadin.tutorial.backend.data.SortOrder;
 import org.vaadin.tutorial.backend.data.ValidationException;
+import org.vaadin.tutorial.backend.common.Quantity;
 import org.vaadin.tutorial.backend.order.OrderDetails;
 import org.vaadin.tutorial.backend.order.OrderId;
 import org.vaadin.tutorial.backend.order.OrderItem;
@@ -88,7 +89,7 @@ public class ShipmentService {
         shipments.values().stream()
                 .filter(s -> orderId.equals(s.getOrderId()))
                 .flatMap(s -> s.getItems().stream())
-                .forEach(item -> quantities.merge(item.productId(), item.quantity(), Integer::sum));
+                .forEach(item -> quantities.merge(item.productId(), item.quantity().value(), Integer::sum));
         return quantities;
     }
 
@@ -105,11 +106,11 @@ public class ShipmentService {
         var remaining = new ArrayList<ShipmentItem>();
 
         for (OrderItem orderItem : order.getItems()) {
-            int orderedQty = orderItem.quantity();
+            int orderedQty = orderItem.quantity().value();
             int shippedQty = shipped.getOrDefault(orderItem.productId(), 0);
             int remainingQty = orderedQty - shippedQty;
             if (remainingQty > 0) {
-                remaining.add(new ShipmentItem(orderItem.productId(), remainingQty));
+                remaining.add(new ShipmentItem(orderItem.productId(), new Quantity(remainingQty)));
             }
         }
         return remaining;
@@ -174,7 +175,7 @@ public class ShipmentService {
         shipments.values().stream()
                 .filter(s -> orderId.equals(s.getOrderId()))
                 .flatMap(s -> s.getItems().stream())
-                .forEach(item -> quantities.merge(item.productId(), item.quantity(), Integer::sum));
+                .forEach(item -> quantities.merge(item.productId(), item.quantity().value(), Integer::sum));
         return quantities;
     }
 

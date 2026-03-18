@@ -1,6 +1,7 @@
 package org.vaadin.tutorial.backend.order;
 
 import org.jspecify.annotations.Nullable;
+import org.vaadin.tutorial.backend.common.Quantity;
 import org.vaadin.tutorial.backend.financial.Money;
 import org.vaadin.tutorial.backend.product.ProductId;
 
@@ -24,7 +25,7 @@ public record OrderItem(
         String productName,
         Money unitPrice,
         @Nullable Money discount,
-        int quantity
+        Quantity quantity
 ) implements Serializable {
 
     public OrderItem {
@@ -37,7 +38,10 @@ public record OrderItem(
         if (unitPrice == null) {
             throw new IllegalArgumentException("Unit price cannot be null");
         }
-        if (quantity < 1) {
+        if (quantity == null) {
+            throw new IllegalArgumentException("Quantity cannot be null");
+        }
+        if (quantity.value() < 1) {
             throw new IllegalArgumentException("Quantity must be at least 1");
         }
     }
@@ -46,7 +50,7 @@ public record OrderItem(
      * Calculates the total price for this item (unitPrice * quantity).
      */
     public Money totalPrice() {
-        return unitPrice.multiply(quantity);
+        return unitPrice.multiply(quantity.value());
     }
 
     /**
@@ -54,6 +58,6 @@ public record OrderItem(
      * or null if there is no discount.
      */
     public @Nullable Money totalDiscount() {
-        return discount != null ? discount.multiply(quantity) : null;
+        return discount != null ? discount.multiply(quantity.value()) : null;
     }
 }

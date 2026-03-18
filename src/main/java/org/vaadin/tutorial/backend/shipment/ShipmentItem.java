@@ -1,5 +1,6 @@
 package org.vaadin.tutorial.backend.shipment;
 
+import org.vaadin.tutorial.backend.common.Quantity;
 import org.vaadin.tutorial.backend.product.ProductId;
 
 import java.io.Serializable;
@@ -15,14 +16,17 @@ import java.io.Serializable;
  */
 public record ShipmentItem(
         ProductId productId,
-        int quantity
+        Quantity quantity
 ) implements Serializable {
 
     public ShipmentItem {
         if (productId == null) {
             throw new IllegalArgumentException("Product ID cannot be null");
         }
-        if (quantity < 1) {
+        if (quantity == null) {
+            throw new IllegalArgumentException("Quantity cannot be null");
+        }
+        if (quantity.value() < 1) {
             throw new IllegalArgumentException("Quantity must be at least 1");
         }
     }

@@ -2,6 +2,7 @@ package org.vaadin.tutorial.backend.shipment;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.vaadin.tutorial.backend.common.Quantity;
 import org.vaadin.tutorial.backend.customer.CustomerId;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;
@@ -182,14 +183,14 @@ class ShipmentServiceTest {
         // First shipment: 3 of product 1, 2 of product 2
         var shipment1 = createShipment(orderId);
         shipment1.setItems(List.of(
-                new ShipmentItem(productId1, 3),
-                new ShipmentItem(productId2, 2)
+                new ShipmentItem(productId1, new Quantity(3)),
+                new ShipmentItem(productId2, new Quantity(2))
         ));
         service.save(shipment1);
 
         // Second shipment: 2 more of product 1
         var shipment2 = createShipment(orderId);
-        shipment2.setItems(List.of(new ShipmentItem(productId1, 2)));
+        shipment2.setItems(List.of(new ShipmentItem(productId1, new Quantity(2))));
         service.save(shipment2);
 
         var quantities = service.getShippedQuantities(orderId);
@@ -205,14 +206,14 @@ class ShipmentServiceTest {
 
         // Create and save an order with 5 of product 1 and 3 of product 2
         var order = createAndSaveOrder(
-                new OrderItem(productId1, "Product 1", new Money(new BigDecimal("10.00")), null, 5),
-                new OrderItem(productId2, "Product 2", new Money(new BigDecimal("20.00")), null, 3)
+                new OrderItem(productId1, "Product 1", new Money(new BigDecimal("10.00")), null, new Quantity(5)),
+                new OrderItem(productId2, "Product 2", new Money(new BigDecimal("20.00")), null, new Quantity(3))
         );
         var orderId = order.getOrderId();
 
         // Ship 3 of product 1
         var shipment = createShipment(orderId);
-        shipment.setItems(List.of(new ShipmentItem(productId1, 3)));
+        shipment.setItems(List.of(new ShipmentItem(productId1, new Quantity(3))));
         service.save(shipment);
 
         var remaining = service.getRemainingItems(order);
@@ -222,12 +223,12 @@ class ShipmentServiceTest {
         var remainingProduct1 = remaining.stream()
                 .filter(i -> i.productId().equals(productId1))
                 .findFirst().orElseThrow();
-        assertEquals(2, remainingProduct1.quantity());
+        assertEquals(new Quantity(2), remainingProduct1.quantity());
         // 3 remaining of product 2 (unshipped)
         var remainingProduct2 = remaining.stream()
                 .filter(i -> i.productId().equals(productId2))
                 .findFirst().orElseThrow();
-        assertEquals(3, remainingProduct2.quantity());
+        assertEquals(new Quantity(3), remainingProduct2.quantity());
     }
 
     @Test
@@ -236,21 +237,21 @@ class ShipmentServiceTest {
         var productId2 = new ProductId(2);
 
         var order = createAndSaveOrder(
-                new OrderItem(productId1, "Product 1", new Money(new BigDecimal("10.00")), null, 2),
-                new OrderItem(productId2, "Product 2", new Money(new BigDecimal("20.00")), null, 3)
+                new OrderItem(productId1, "Product 1", new Money(new BigDecimal("10.00")), null, new Quantity(2)),
+                new OrderItem(productId2, "Product 2", new Money(new BigDecimal("20.00")), null, new Quantity(3))
         );
         var orderId = order.getOrderId();
 
         // Ship all of product 1
         var shipment = createShipment(orderId);
-        shipment.setItems(List.of(new ShipmentItem(productId1, 2)));
+        shipment.setItems(List.of(new ShipmentItem(productId1, new Quantity(2))));
         service.save(shipment);
 
         var remaining = service.getRemainingItems(order);
 
         assertEquals(1, remaining.size());
         assertEquals(productId2, remaining.get(0).productId());
-        assertEquals(3, remaining.get(0).quantity());
+        assertEquals(new Quantity(3), remaining.get(0).quantity());
     }
 
     @Test
@@ -258,13 +259,13 @@ class ShipmentServiceTest {
         var productId = new ProductId(1);
 
         var order = createAndSaveOrder(
-                new OrderItem(productId, "Product", new Money(new BigDecimal("10.00")), null, 5)
+                new OrderItem(productId, "Product", new Money(new BigDecimal("10.00")), null, new Quantity(5))
         );
         var orderId = order.getOrderId();
 
         // Ship all items
         var shipment = createShipment(orderId);
-        shipment.setItems(List.of(new ShipmentItem(productId, 5)));
+        shipment.setItems(List.of(new ShipmentItem(productId, new Quantity(5))));
         service.save(shipment);
 
         assertTrue(service.isFullyShipped(order));
@@ -275,13 +276,13 @@ class ShipmentServiceTest {
         var productId = new ProductId(1);
 
         var order = createAndSaveOrder(
-                new OrderItem(productId, "Product", new Money(new BigDecimal("10.00")), null, 5)
+                new OrderItem(productId, "Product", new Money(new BigDecimal("10.00")), null, new Quantity(5))
         );
         var orderId = order.getOrderId();
 
         // Ship only 3 items
         var shipment = createShipment(orderId);
-        shipment.setItems(List.of(new ShipmentItem(productId, 3)));
+        shipment.setItems(List.of(new ShipmentItem(productId, new Quantity(3))));
         service.save(shipment);
 
         assertFalse(service.isFullyShipped(order));
@@ -303,7 +304,7 @@ class ShipmentServiceTest {
         var shipment = new ShipmentDetails();
         shipment.setOrderId(orderId);
         shipment.setState(ShipmentState.COLLECTING);
-        shipment.addItem(new ShipmentItem(new ProductId(1), 1));
+        shipment.addItem(new ShipmentItem(new ProductId(1), new Quantity(1)));
         return shipment;
     }
 

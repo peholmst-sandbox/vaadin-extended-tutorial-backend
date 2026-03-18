@@ -4,6 +4,8 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
+import org.vaadin.tutorial.backend.common.EmailAddress;
+import org.vaadin.tutorial.backend.common.PhoneNumber;
 import org.vaadin.tutorial.backend.data.DataIntegrityViolationException;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;

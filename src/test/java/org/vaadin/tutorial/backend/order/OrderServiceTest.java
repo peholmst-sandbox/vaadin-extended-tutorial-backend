@@ -2,6 +2,7 @@ package org.vaadin.tutorial.backend.order;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.vaadin.tutorial.backend.common.Quantity;
 import org.vaadin.tutorial.backend.customer.CustomerId;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;
@@ -205,7 +206,7 @@ class OrderServiceTest {
                 productName,
                 new Money(new BigDecimal("99.99")),
                 null,
-                1
+                new Quantity(1)
         );
     }
 }

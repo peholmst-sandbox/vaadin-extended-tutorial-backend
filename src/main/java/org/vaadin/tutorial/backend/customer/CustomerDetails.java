@@ -3,6 +3,8 @@ package org.vaadin.tutorial.backend.customer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.Nullable;
+import org.vaadin.tutorial.backend.common.EmailAddress;
+import org.vaadin.tutorial.backend.common.PhoneNumber;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointId;
 import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
