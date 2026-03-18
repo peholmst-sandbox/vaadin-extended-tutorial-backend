@@ -1,22 +1,56 @@
 package org.vaadin.tutorial.backend.product;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.vaadin.tutorial.backend.financial.Money;
+import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
 import java.time.LocalDate;
 
+/**
+ * Represents the full details of a product in the catalog.
+ * <p>
+ * This is a mutable bean that supports two states:
+ * <ul>
+ *   <li><b>Draft state:</b> When created via the no-arg constructor, all fields are null.
+ *       This state is used during form editing.</li>
+ *   <li><b>Saved state:</b> After being saved via {@link ProductCatalogService#save},
+ *       required fields are guaranteed to be non-null, and {@code productId} and
+ *       {@code version} are assigned by the service.</li>
+ * </ul>
+ * <p>
+ * Required fields (validated before save): {@code name}, {@code description},
+ * {@code category}, {@code brand}, {@code sku}, {@code price}.
+ * <p>
+ * Optional fields: {@code releaseDate}, {@code discount}.
+ */
 public class ProductDetails {
 
     private @Nullable ProductId productId;
     private @Nullable Long version;
-    private String name;
-    private String description;
-    private String category;
-    private String brand;
-    private String sku;
-    private LocalDate releaseDate;
-    private Money price;
-    private Money discount;
+
+    @NotBlank(groups = OnSave.class, message = "Name is required")
+    private @Nullable String name;
+
+    @NotBlank(groups = OnSave.class, message = "Description is required")
+    private @Nullable String description;
+
+    @NotBlank(groups = OnSave.class, message = "Category is required")
+    private @Nullable String category;
+
+    @NotBlank(groups = OnSave.class, message = "Brand is required")
+    private @Nullable String brand;
+
+    @NotBlank(groups = OnSave.class, message = "SKU is required")
+    private @Nullable String sku;
+
+    private @Nullable LocalDate releaseDate;
+
+    @NotNull(groups = OnSave.class, message = "Price is required")
+    private @Nullable Money price;
+
+    private @Nullable Money discount;
 
     public ProductDetails() {
     }
@@ -50,67 +84,67 @@ public class ProductDetails {
         this.version = version;
     }
 
-    public String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(@Nullable String name) {
         this.name = name;
     }
 
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(@Nullable String description) {
         this.description = description;
     }
 
-    public String getCategory() {
+    public @Nullable String getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(@Nullable String category) {
         this.category = category;
     }
 
-    public String getBrand() {
+    public @Nullable String getBrand() {
         return brand;
     }
 
-    public void setBrand(String brand) {
+    public void setBrand(@Nullable String brand) {
         this.brand = brand;
     }
 
-    public String getSku() {
+    public @Nullable String getSku() {
         return sku;
     }
 
-    public void setSku(String sku) {
+    public void setSku(@Nullable String sku) {
         this.sku = sku;
     }
 
-    public LocalDate getReleaseDate() {
+    public @Nullable LocalDate getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(LocalDate releaseDate) {
+    public void setReleaseDate(@Nullable LocalDate releaseDate) {
         this.releaseDate = releaseDate;
     }
 
-    public Money getPrice() {
+    public @Nullable Money getPrice() {
         return price;
     }
 
-    public void setPrice(Money price) {
+    public void setPrice(@Nullable Money price) {
         this.price = price;
     }
 
-    public Money getDiscount() {
+    public @Nullable Money getDiscount() {
         return discount;
     }
 
-    public void setDiscount(Money discount) {
+    public void setDiscount(@Nullable Money discount) {
         this.discount = discount;
     }
 

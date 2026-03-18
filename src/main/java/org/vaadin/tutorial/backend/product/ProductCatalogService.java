@@ -1,12 +1,16 @@
 package org.vaadin.tutorial.backend.product;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.vaadin.tutorial.backend.data.DataIntegrityViolationException;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;
 import org.vaadin.tutorial.backend.data.SortOrder;
+import org.vaadin.tutorial.backend.data.ValidationException;
 import org.vaadin.tutorial.backend.financial.Money;
+import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -72,9 +76,13 @@ public class ProductCatalogService {
 
     private final ConcurrentHashMap<ProductId, ProductDetails> products = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
+    private final Validator validator;
     private volatile Duration artificialDelay = Duration.ofMillis(200);
 
     public ProductCatalogService() {
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            this.validator = factory.getValidator();
+        }
         generateTestData();
     }
 
@@ -113,10 +121,18 @@ public class ProductCatalogService {
 
     public ProductDetails save(ProductDetails productDetails) {
         simulateDelay();
+        validate(productDetails);
         if (productDetails.getProductId() == null) {
             return insert(productDetails);
         } else {
             return update(productDetails);
+        }
+    }
+
+    private void validate(ProductDetails productDetails) {
+        var violations = validator.validate(productDetails, OnSave.class);
+        if (!violations.isEmpty()) {
+            throw new ValidationException(violations);
         }
     }
 
@@ -132,6 +148,7 @@ public class ProductCatalogService {
 
     private ProductDetails update(ProductDetails productDetails) {
         checkForDuplicateSku(productDetails.getSku(), productDetails.getProductId());
+        assert productDetails.getProductId() != null;
         var result = products.compute(productDetails.getProductId(), (id, existing) -> {
             if (existing == null) {
                 throw new NoSuchElementException("Product not found: " + id);

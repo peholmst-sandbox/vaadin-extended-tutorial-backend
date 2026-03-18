@@ -5,10 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.vaadin.tutorial.backend.data.DataIntegrityViolationException;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;
+import org.vaadin.tutorial.backend.data.ValidationException;
 import org.vaadin.tutorial.backend.financial.Money;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -85,24 +87,97 @@ class ProductCatalogServiceTest {
     }
 
     @Test
-    void save_allowsNullSku() {
-        var product = createProduct(null);
+    void save_throwsValidationExceptionWhenNameIsNull() {
+        var product = createProduct("VALID-SKU");
+        product.setName(null);
 
-        var saved = service.save(product);
-
-        assertNotNull(saved.getProductId());
-        assertNull(saved.getSku());
+        var exception = assertThrows(ValidationException.class, () -> service.save(product));
+        assertTrue(exception.getMessage().contains("name"));
     }
 
     @Test
-    void save_allowsMultipleProductsWithNullSku() {
-        var product1 = createProduct(null);
-        var product2 = createProduct(null);
+    void save_throwsValidationExceptionWhenSkuIsNull() {
+        var product = createProduct("TEMP-SKU");
+        product.setSku(null);
 
-        var saved1 = service.save(product1);
-        var saved2 = service.save(product2);
+        var exception = assertThrows(ValidationException.class, () -> service.save(product));
+        assertTrue(exception.getMessage().contains("sku"));
+    }
 
-        assertNotEquals(saved1.getProductId(), saved2.getProductId());
+    @Test
+    void save_throwsValidationExceptionWhenPriceIsNull() {
+        var product = createProduct("VALID-SKU");
+        product.setPrice(null);
+
+        var exception = assertThrows(ValidationException.class, () -> service.save(product));
+        assertTrue(exception.getMessage().contains("price"));
+    }
+
+    @Test
+    void save_throwsValidationExceptionWhenDescriptionIsNull() {
+        var product = createProduct("VALID-SKU");
+        product.setDescription(null);
+
+        var exception = assertThrows(ValidationException.class, () -> service.save(product));
+        assertTrue(exception.getMessage().contains("description"));
+    }
+
+    @Test
+    void save_throwsValidationExceptionWhenCategoryIsNull() {
+        var product = createProduct("VALID-SKU");
+        product.setCategory(null);
+
+        var exception = assertThrows(ValidationException.class, () -> service.save(product));
+        assertTrue(exception.getMessage().contains("category"));
+    }
+
+    @Test
+    void save_throwsValidationExceptionWhenBrandIsNull() {
+        var product = createProduct("VALID-SKU");
+        product.setBrand(null);
+
+        var exception = assertThrows(ValidationException.class, () -> service.save(product));
+        assertTrue(exception.getMessage().contains("brand"));
+    }
+
+    @Test
+    void save_throwsValidationExceptionForBlankName() {
+        var product = createProduct("VALID-SKU");
+        product.setName("   ");
+
+        assertThrows(ValidationException.class, () -> service.save(product));
+    }
+
+    @Test
+    void save_allowsNullReleaseDate() {
+        var product = createProduct("OPTIONAL-RELEASE-SKU");
+        product.setReleaseDate(null);
+
+        var saved = service.save(product);
+
+        assertNull(saved.getReleaseDate());
+    }
+
+    @Test
+    void save_allowsNullDiscount() {
+        var product = createProduct("OPTIONAL-DISCOUNT-SKU");
+        product.setDiscount(null);
+
+        var saved = service.save(product);
+
+        assertNull(saved.getDiscount());
+    }
+
+    @Test
+    void save_allowsReleaseDateAndDiscountToBeSet() {
+        var product = createProduct("FULL-PRODUCT-SKU");
+        product.setReleaseDate(LocalDate.of(2024, 6, 15));
+        product.setDiscount(new Money(new BigDecimal("10.00")));
+
+        var saved = service.save(product);
+
+        assertEquals(LocalDate.of(2024, 6, 15), saved.getReleaseDate());
+        assertEquals(new Money(new BigDecimal("10.00")), saved.getDiscount());
     }
 
     @Test
