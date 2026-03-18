@@ -1,6 +1,7 @@
 package org.vaadin.tutorial.backend.product;
 
-import org.vaadin.tutorial.backend.data.OptimisticLockingException;
+import org.springframework.stereotype.Service;
+import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;
 import org.vaadin.tutorial.backend.data.SortOrder;
 import org.vaadin.tutorial.backend.financial.Money;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+@Service
 public class ProductCatalogService {
 
     private static final String[] CATEGORIES = {
@@ -131,7 +133,7 @@ public class ProductCatalogService {
                 throw new NoSuchElementException("Product not found: " + id);
             }
             if (!Objects.equals(existing.getVersion(), productDetails.getVersion())) {
-                throw new OptimisticLockingException();
+                throw new OptimisticLockingFailureException();
             }
             var updated = new ProductDetails(productDetails);
             updated.setProductId(id);

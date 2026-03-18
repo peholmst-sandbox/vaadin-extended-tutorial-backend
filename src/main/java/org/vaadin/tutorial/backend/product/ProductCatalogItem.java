@@ -10,4 +10,9 @@ public record ProductCatalogItem(
         String brand,
         Money price
 ) {
+    public static final String SORT_PROPERTY_NAME = "name";
+    public static final String SORT_PROPERTY_DESCRIPTION = "description";
+    public static final String SORT_PROPERTY_CATEGORY = "category";
+    public static final String SORT_PROPERTY_BRAND = "brand";
+    public static final String SORT_PROPERTY_PRICE = "price";
 }
