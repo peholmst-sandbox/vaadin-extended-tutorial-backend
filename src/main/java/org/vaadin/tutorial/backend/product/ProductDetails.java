@@ -1,13 +1,14 @@
 package org.vaadin.tutorial.backend.product;
 
+import org.jspecify.annotations.Nullable;
 import org.vaadin.tutorial.backend.financial.Money;
 
 import java.time.LocalDate;
 
 public class ProductDetails {
 
-    private ProductId productId;
-    private Long version;
+    private @Nullable ProductId productId;
+    private @Nullable Long version;
     private String name;
     private String description;
     private String category;
@@ -33,12 +34,20 @@ public class ProductDetails {
         this.discount = original.discount;
     }
 
-    public ProductId getProductId() {
+    public @Nullable ProductId getProductId() {
         return productId;
     }
 
-    public Long getVersion() {
+    void setProductId(ProductId productId) {
+        this.productId = productId;
+    }
+
+    public @Nullable Long getVersion() {
         return version;
+    }
+
+    void setVersion(Long version) {
+        this.version = version;
     }
 
     public String getName() {
