@@ -36,8 +36,8 @@ public class ProductDetails {
     @NotBlank(groups = OnSave.class, message = "Description is required")
     private @Nullable String description;
 
-    @NotBlank(groups = OnSave.class, message = "Category is required")
-    private @Nullable String category;
+    @NotNull(groups = OnSave.class, message = "Category is required")
+    private @Nullable ProductCategoryId category;
 
     @NotBlank(groups = OnSave.class, message = "Brand is required")
     private @Nullable String brand;
@@ -100,11 +100,11 @@ public class ProductDetails {
         this.description = description;
     }
 
-    public @Nullable String getCategory() {
+    public @Nullable ProductCategoryId getCategory() {
         return category;
     }
 
-    public void setCategory(@Nullable String category) {
+    public void setCategory(@Nullable ProductCategoryId category) {
         this.category = category;
     }
 

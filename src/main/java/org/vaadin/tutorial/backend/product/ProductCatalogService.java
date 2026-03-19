@@ -20,12 +20,6 @@ import java.util.stream.Stream;
 @Service
 public class ProductCatalogService {
 
-    private static final String[] CATEGORIES = {
-            "Electronics", "Clothing", "Home & Garden", "Sports & Outdoors",
-            "Books", "Toys & Games", "Food & Beverages", "Health & Beauty",
-            "Automotive", "Office Supplies"
-    };
-
     private static final String[][] BRANDS = {
             {"Samsung", "Apple", "Sony", "LG", "Philips"},
             {"Nike", "Adidas", "Levi's", "H&M", "Zara"},
@@ -75,9 +69,12 @@ public class ProductCatalogService {
     private final AtomicLong nextId = new AtomicLong(1);
     private final Validator validator;
     private final Duration artificialDelay;
+    private final ProductCategoryService productCategoryService;
 
-    public ProductCatalogService(@Value("${tutorial.backend.artificial-delay:PT0.2S}") Duration artificialDelay) {
+    public ProductCatalogService(@Value("${tutorial.backend.artificial-delay:PT0.2S}") Duration artificialDelay,
+                                 ProductCategoryService productCategoryService) {
         this.artificialDelay = artificialDelay;
+        this.productCategoryService = productCategoryService;
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             this.validator = factory.getValidator();
         }
@@ -172,12 +169,21 @@ public class ProductCatalogService {
             stream = stream.filter(p ->
                     contains(p.getName(), term)
                             || contains(p.getDescription(), term)
-                            || contains(p.getCategory(), term)
+                            || containsCategory(p.getCategory(), term)
                             || contains(p.getBrand(), term)
                             || contains(p.getSku(), term)
             );
         }
         return stream;
+    }
+
+    private boolean containsCategory(@Nullable ProductCategoryId categoryId, String term) {
+        if (categoryId == null) {
+            return false;
+        }
+        return productCategoryService.findById(categoryId)
+                .map(c -> c.name().toLowerCase(Locale.ROOT).contains(term))
+                .orElse(false);
     }
 
     private static boolean contains(@Nullable String value, String term) {
@@ -205,7 +211,7 @@ public class ProductCatalogService {
         return switch (property) {
             case NAME -> product.getName();
             case DESCRIPTION -> product.getDescription();
-            case CATEGORY -> product.getCategory();
+            case CATEGORY -> product.getCategory() != null ? product.getCategory().id() : null;
             case BRAND -> product.getBrand();
             case SKU -> product.getSku();
             case RELEASE_DATE -> product.getReleaseDate();
@@ -241,10 +247,13 @@ public class ProductCatalogService {
     private void generateTestData() {
         var random = new Random(42);
         var baseDate = LocalDate.of(2024, 1, 1);
+        var categories = productCategoryService.findAll();
 
         for (int i = 0; i < 300; i++) {
-            int categoryIndex = i % CATEGORIES.length;
-            var category = CATEGORIES[categoryIndex];
+            int categoryIndex = i % categories.size();
+            var category = categories.get(categoryIndex);
+            var categoryId = category.productCategoryId();
+            var categoryName = category.name();
             var brands = BRANDS[categoryIndex];
             var productTypes = PRODUCT_TYPES[categoryIndex];
             var priceRange = PRICE_RANGE[categoryIndex];
@@ -259,8 +268,8 @@ public class ProductCatalogService {
             product.setVersion(1L);
             product.setName(adjective + " " + productType);
             product.setDescription(brand + " " + adjective.toLowerCase(Locale.ROOT) + " " + productType.toLowerCase(Locale.ROOT)
-                    + " - high quality " + category.toLowerCase(Locale.ROOT) + " product.");
-            product.setCategory(category);
+                    + " - high quality " + categoryName.toLowerCase(Locale.ROOT) + " product.");
+            product.setCategory(categoryId);
             product.setBrand(brand);
             product.setSku("SKU-" + String.format("%04d", id.id()));
             product.setReleaseDate(baseDate.plusDays(random.nextInt(730)));

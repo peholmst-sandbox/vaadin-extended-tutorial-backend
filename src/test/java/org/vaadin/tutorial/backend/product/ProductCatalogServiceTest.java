@@ -19,10 +19,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class ProductCatalogServiceTest {
 
     private ProductCatalogService service;
+    private ProductCategoryService categoryService;
 
     @BeforeEach
     void setUp() {
-        service = new ProductCatalogService(Duration.ZERO);
+        categoryService = new ProductCategoryService(Duration.ZERO);
+        service = new ProductCatalogService(Duration.ZERO, categoryService);
     }
 
     @Test
@@ -241,7 +243,7 @@ class ProductCatalogServiceTest {
         var product = new ProductDetails();
         product.setName("Test Product");
         product.setDescription("Test Description");
-        product.setCategory("Electronics");
+        product.setCategory(categoryService.idOf("Electronics"));
         product.setBrand("TestBrand");
         product.setSku(sku);
         product.setPrice(new Money(new BigDecimal("99.99")));
