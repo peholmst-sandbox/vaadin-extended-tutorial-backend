@@ -5,6 +5,7 @@ import jakarta.validation.Validator;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.vaadin.tutorial.backend.common.TutorialBackendService;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;
 import org.vaadin.tutorial.backend.data.SortOrder;
@@ -18,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 @Service
-public class PickupPointService {
+public class PickupPointService extends TutorialBackendService {
 
     private static final String[] PICKUP_POINT_NAMES = {
             "Central Station", "Airport Terminal", "Shopping Mall", "City Center",
@@ -50,10 +51,9 @@ public class PickupPointService {
     private final ConcurrentHashMap<PickupPointId, PickupPointDetails> pickupPoints = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
     private final Validator validator;
-    private final Duration artificialDelay;
 
     public PickupPointService(@Value("${tutorial.backend.artificial-delay:PT0.2S}") Duration artificialDelay) {
-        this.artificialDelay = artificialDelay;
+        super(artificialDelay);
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             this.validator = factory.getValidator();
         }
@@ -167,18 +167,6 @@ public class PickupPointService {
             case ACTIVE -> pickupPoint.getActive();
             case PICKUP_POINT_ID -> pickupPoint.getPickupPointId() != null ? pickupPoint.getPickupPointId().id() : null;
         };
-    }
-
-    private void simulateDelay() {
-        var delay = artificialDelay;
-        if (!delay.isZero() && !delay.isNegative()) {
-            try {
-                Thread.sleep(delay.toMillis());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException("Interrupted during simulated delay", e);
-            }
-        }
     }
 
     private void generateTestData() {

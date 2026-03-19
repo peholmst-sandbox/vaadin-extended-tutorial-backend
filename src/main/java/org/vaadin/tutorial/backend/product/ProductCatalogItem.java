@@ -6,7 +6,7 @@ public record ProductCatalogItem(
         ProductId productId,
         String name,
         String description,
-        ProductCategoryId category,
+        ProductCategory category,
         String brand,
         Money price
 ) {

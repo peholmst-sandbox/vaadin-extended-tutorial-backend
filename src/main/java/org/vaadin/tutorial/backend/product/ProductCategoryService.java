@@ -2,6 +2,7 @@ package org.vaadin.tutorial.backend.product;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.vaadin.tutorial.backend.common.TutorialBackendService;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -11,14 +12,13 @@ import java.util.SequencedMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
-public class ProductCategoryService {
+public class ProductCategoryService extends TutorialBackendService {
 
     private final SequencedMap<ProductCategoryId, ProductCategory> categories = new LinkedHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
-    private final Duration artificialDelay;
 
     public ProductCategoryService(@Value("${tutorial.backend.artificial-delay:PT0.2S}") Duration artificialDelay) {
-        this.artificialDelay = artificialDelay;
+        super(artificialDelay);
         generateTestData();
     }
 
@@ -32,24 +32,16 @@ public class ProductCategoryService {
         return Optional.ofNullable(categories.get(id));
     }
 
+    Optional<ProductCategory> getById(ProductCategoryId id) {
+        return Optional.ofNullable(categories.get(id));
+    }
+
     ProductCategoryId idOf(String categoryName) {
         return categories.values().stream()
                 .filter(c -> c.name().equals(categoryName))
                 .map(ProductCategory::productCategoryId)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Unknown category: " + categoryName));
-    }
-
-    private void simulateDelay() {
-        var delay = artificialDelay;
-        if (!delay.isZero() && !delay.isNegative()) {
-            try {
-                Thread.sleep(delay.toMillis());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException("Interrupted during simulated delay", e);
-            }
-        }
     }
 
     private void generateTestData() {

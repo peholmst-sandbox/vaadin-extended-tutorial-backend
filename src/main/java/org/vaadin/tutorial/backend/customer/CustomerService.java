@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.vaadin.tutorial.backend.common.EmailAddress;
 import org.vaadin.tutorial.backend.common.PhoneNumber;
+import org.vaadin.tutorial.backend.common.TutorialBackendService;
 import org.vaadin.tutorial.backend.data.DataIntegrityViolationException;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;
@@ -21,7 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 @Service
-public class CustomerService {
+public class CustomerService extends TutorialBackendService {
 
     private static final String[] FIRST_NAMES = {
             "Alice", "Bob", "Carol", "David", "Emma", "Frank", "Grace", "Henry",
@@ -42,10 +43,9 @@ public class CustomerService {
     private final ConcurrentHashMap<CustomerId, CustomerDetails> customers = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
     private final Validator validator;
-    private final Duration artificialDelay;
 
     public CustomerService(@Value("${tutorial.backend.artificial-delay:PT0.2S}") Duration artificialDelay) {
-        this.artificialDelay = artificialDelay;
+        super(artificialDelay);
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             this.validator = factory.getValidator();
         }
@@ -171,18 +171,6 @@ public class CustomerService {
             case PHONE -> customer.getPhone() != null ? customer.getPhone().value() : null;
             case CUSTOMER_ID -> customer.getCustomerId() != null ? customer.getCustomerId().id() : null;
         };
-    }
-
-    private void simulateDelay() {
-        var delay = artificialDelay;
-        if (!delay.isZero() && !delay.isNegative()) {
-            try {
-                Thread.sleep(delay.toMillis());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException("Interrupted during simulated delay", e);
-            }
-        }
     }
 
     private void generateTestData() {

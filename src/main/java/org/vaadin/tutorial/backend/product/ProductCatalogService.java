@@ -5,6 +5,7 @@ import jakarta.validation.Validator;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.vaadin.tutorial.backend.common.TutorialBackendService;
 import org.vaadin.tutorial.backend.data.*;
 import org.vaadin.tutorial.backend.financial.Money;
 import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
@@ -18,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 @Service
-public class ProductCatalogService {
+public class ProductCatalogService extends TutorialBackendService {
 
     private static final String[][] BRANDS = {
             {"Samsung", "Apple", "Sony", "LG", "Philips"},
@@ -68,12 +69,11 @@ public class ProductCatalogService {
     private final ConcurrentHashMap<ProductId, ProductDetails> products = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
     private final Validator validator;
-    private final Duration artificialDelay;
     private final ProductCategoryService productCategoryService;
 
     public ProductCatalogService(@Value("${tutorial.backend.artificial-delay:PT0.2S}") Duration artificialDelay,
                                  ProductCategoryService productCategoryService) {
-        this.artificialDelay = artificialDelay;
+        super(artificialDelay);
         this.productCategoryService = productCategoryService;
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             this.validator = factory.getValidator();
@@ -181,7 +181,7 @@ public class ProductCatalogService {
         if (categoryId == null) {
             return false;
         }
-        return productCategoryService.findById(categoryId)
+        return productCategoryService.getById(categoryId)
                 .map(c -> c.name().toLowerCase(Locale.ROOT).contains(term))
                 .orElse(false);
     }
@@ -222,26 +222,17 @@ public class ProductCatalogService {
     }
 
     private ProductCatalogItem toCatalogItem(ProductDetails details) {
+        var category = details.getCategory() != null
+                ? productCategoryService.getById(details.getCategory()).orElse(null)
+                : null;
         return new ProductCatalogItem(
                 details.getProductId(),
                 details.getName(),
                 details.getDescription(),
-                details.getCategory(),
+                category,
                 details.getBrand(),
                 details.getPrice()
         );
-    }
-
-    private void simulateDelay() {
-        var delay = artificialDelay;
-        if (!delay.isZero() && !delay.isNegative()) {
-            try {
-                Thread.sleep(delay.toMillis());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException("Interrupted during simulated delay", e);
-            }
-        }
     }
 
     private void generateTestData() {
