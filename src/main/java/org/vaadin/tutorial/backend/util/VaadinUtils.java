@@ -4,6 +4,7 @@ import com.vaadin.flow.function.SerializableFunction;
 import org.vaadin.tutorial.backend.data.Query;
 import org.vaadin.tutorial.backend.data.SortOrder;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -37,10 +38,18 @@ public final class VaadinUtils {
     }
 
     public static <F, T> SerializableFunction<F, T> mapOrNull(SerializableFunction<F, T> mapper) {
-        return from -> from == null ? null : mapper.apply(from);
+        return mapOrDefault(mapper, null, null);
+    }
+
+    public static <F, T> SerializableFunction<F, T> mapOrDefault(SerializableFunction<F, T> mapper, F emptyValue, T defaultValue) {
+        return from -> Objects.equals(from, emptyValue) ? defaultValue : mapper.apply(from);
     }
 
     public static <F, T> SerializableFunction<F, T> flatMapOrNull(SerializableFunction<F, Optional<T>> mapper) {
-        return from -> from == null ? null : mapper.apply(from).orElse(null);
+        return flatMapOrDefault(mapper, null, null);
+    }
+
+    public static <F, T> SerializableFunction<F, T> flatMapOrDefault(SerializableFunction<F, Optional<T>> mapper, F emptyValue, T defaultValue) {
+        return from -> Objects.equals(from, emptyValue) ? defaultValue : mapper.apply(from).orElse(defaultValue);
     }
 }
