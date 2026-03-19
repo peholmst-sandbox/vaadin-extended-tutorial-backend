@@ -42,8 +42,8 @@ public class ProductDetails {
     @NotBlank(groups = OnSave.class, message = "Brand is required")
     private @Nullable String brand;
 
-    @NotBlank(groups = OnSave.class, message = "SKU is required")
-    private @Nullable String sku;
+    @NotNull(groups = OnSave.class, message = "SKU is required")
+    private @Nullable SKU sku;
 
     private @Nullable LocalDate releaseDate;
 
@@ -116,11 +116,11 @@ public class ProductDetails {
         this.brand = brand;
     }
 
-    public @Nullable String getSku() {
+    public @Nullable SKU getSku() {
         return sku;
     }
 
-    public void setSku(@Nullable String sku) {
+    public void setSku(@Nullable SKU sku) {
         this.sku = sku;
     }
 

@@ -151,7 +151,7 @@ public class ProductCatalogService extends TutorialBackendService {
         return new ProductDetails(result);
     }
 
-    private void checkForDuplicateSku(@Nullable String sku, @Nullable ProductId excludeId) {
+    private void checkForDuplicateSku(@Nullable SKU sku, @Nullable ProductId excludeId) {
         if (sku == null) {
             return;
         }
@@ -171,7 +171,7 @@ public class ProductCatalogService extends TutorialBackendService {
                             || contains(p.getDescription(), term)
                             || containsCategory(p.getCategory(), term)
                             || contains(p.getBrand(), term)
-                            || contains(p.getSku(), term)
+                            || containsSku(p.getSku(), term)
             );
         }
         return stream;
@@ -184,6 +184,10 @@ public class ProductCatalogService extends TutorialBackendService {
         return productCategoryService.getById(categoryId)
                 .map(c -> c.name().toLowerCase(Locale.ROOT).contains(term))
                 .orElse(false);
+    }
+
+    private static boolean containsSku(@Nullable SKU sku, String term) {
+        return sku != null && sku.value().toLowerCase(Locale.ROOT).contains(term);
     }
 
     private static boolean contains(@Nullable String value, String term) {
@@ -213,7 +217,7 @@ public class ProductCatalogService extends TutorialBackendService {
             case DESCRIPTION -> product.getDescription();
             case CATEGORY -> product.getCategory() != null ? product.getCategory().id() : null;
             case BRAND -> product.getBrand();
-            case SKU -> product.getSku();
+            case SKU -> product.getSku() != null ? product.getSku().value() : null;
             case RELEASE_DATE -> product.getReleaseDate();
             case PRICE -> product.getPrice() != null ? product.getPrice().amount() : null;
             case DISCOUNT -> product.getDiscount() != null ? product.getDiscount().amount() : null;
@@ -231,6 +235,7 @@ public class ProductCatalogService extends TutorialBackendService {
                 details.getDescription(),
                 category,
                 details.getBrand(),
+                details.getSku(),
                 details.getPrice()
         );
     }
@@ -262,7 +267,7 @@ public class ProductCatalogService extends TutorialBackendService {
                     + " - high quality " + categoryName.toLowerCase(Locale.ROOT) + " product.");
             product.setCategory(categoryId);
             product.setBrand(brand);
-            product.setSku("SKU-" + String.format("%04d", id.id()));
+            product.setSku(new SKU("SKU-" + String.format("%04d", id.id())));
             product.setReleaseDate(baseDate.plusDays(random.nextInt(730)));
 
             int priceInCents = priceRange[0] + random.nextInt(priceRange[1] - priceRange[0]);

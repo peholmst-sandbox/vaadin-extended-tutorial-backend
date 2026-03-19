@@ -8,6 +8,7 @@ public record ProductCatalogItem(
         String description,
         ProductCategory category,
         String brand,
+        SKU sku,
         Money price
 ) {
 }

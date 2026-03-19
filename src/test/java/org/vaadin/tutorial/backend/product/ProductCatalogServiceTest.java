@@ -35,7 +35,7 @@ class ProductCatalogServiceTest {
 
         assertNotNull(saved.getProductId());
         assertEquals(1L, saved.getVersion());
-        assertEquals("NEW-SKU-001", saved.getSku());
+        assertEquals(new SKU("NEW-SKU-001"), saved.getSku());
     }
 
     @Test
@@ -69,7 +69,7 @@ class ProductCatalogServiceTest {
         var product2 = createProduct("SKU-SECOND");
         var saved2 = service.save(product2);
 
-        saved2.setSku("SKU-FIRST");
+        saved2.setSku(new SKU("SKU-FIRST"));
 
         assertThrows(DataIntegrityViolationException.class, () -> service.save(saved2));
     }
@@ -83,7 +83,7 @@ class ProductCatalogServiceTest {
 
         var updated = service.save(saved);
 
-        assertEquals("SAME-SKU", updated.getSku());
+        assertEquals(new SKU("SAME-SKU"), updated.getSku());
         assertEquals("Updated Name", updated.getName());
     }
 
@@ -245,7 +245,7 @@ class ProductCatalogServiceTest {
         product.setDescription("Test Description");
         product.setCategory(categoryService.idOf("Electronics"));
         product.setBrand("TestBrand");
-        product.setSku(sku);
+        product.setSku(new SKU(sku));
         product.setPrice(new Money(new BigDecimal("99.99")));
         return product;
     }
