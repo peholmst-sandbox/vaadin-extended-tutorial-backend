@@ -24,8 +24,7 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new OrderService();
-        service.setArtificialDelay(Duration.ZERO);
+        service = new OrderService(Duration.ZERO);
     }
 
     @Test

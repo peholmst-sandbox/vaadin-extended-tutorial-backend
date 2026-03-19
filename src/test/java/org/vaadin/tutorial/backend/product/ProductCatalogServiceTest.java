@@ -22,8 +22,7 @@ class ProductCatalogServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ProductCatalogService();
-        service.setArtificialDelay(Duration.ZERO);
+        service = new ProductCatalogService(Duration.ZERO);
     }
 
     @Test

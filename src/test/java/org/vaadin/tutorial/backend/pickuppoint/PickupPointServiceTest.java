@@ -18,8 +18,7 @@ class PickupPointServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new PickupPointService();
-        service.setArtificialDelay(Duration.ZERO);
+        service = new PickupPointService(Duration.ZERO);
     }
 
     @Test

@@ -3,6 +3,7 @@ package org.vaadin.tutorial.backend.order;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;
@@ -22,20 +23,13 @@ public class OrderService {
     private final ConcurrentHashMap<OrderId, OrderDetails> orders = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
     private final Validator validator;
-    private volatile Duration artificialDelay = Duration.ofMillis(200);
+    private final Duration artificialDelay;
 
-    public OrderService() {
+    public OrderService(@Value("${tutorial.backend.artificial-delay:PT0.2S}") Duration artificialDelay) {
+        this.artificialDelay = artificialDelay;
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             this.validator = factory.getValidator();
         }
-    }
-
-    public void setArtificialDelay(Duration delay) {
-        this.artificialDelay = Objects.requireNonNull(delay);
-    }
-
-    public Duration getArtificialDelay() {
-        return artificialDelay;
     }
 
     public List<OrderDetails> findAll(Query<OrderFilter, OrderSortProperty> query) {

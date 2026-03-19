@@ -29,10 +29,8 @@ class ShipmentServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ShipmentService();
-        service.setArtificialDelay(Duration.ZERO);
-        orderService = new OrderService();
-        orderService.setArtificialDelay(Duration.ZERO);
+        service = new ShipmentService(Duration.ZERO);
+        orderService = new OrderService(Duration.ZERO);
     }
 
     @Test

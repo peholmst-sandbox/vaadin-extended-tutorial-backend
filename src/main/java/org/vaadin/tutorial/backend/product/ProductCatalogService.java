@@ -3,12 +3,9 @@ package org.vaadin.tutorial.backend.product;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.vaadin.tutorial.backend.data.DataIntegrityViolationException;
-import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
-import org.vaadin.tutorial.backend.data.Query;
-import org.vaadin.tutorial.backend.data.SortOrder;
-import org.vaadin.tutorial.backend.data.ValidationException;
+import org.vaadin.tutorial.backend.data.*;
 import org.vaadin.tutorial.backend.financial.Money;
 import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
@@ -77,21 +74,14 @@ public class ProductCatalogService {
     private final ConcurrentHashMap<ProductId, ProductDetails> products = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
     private final Validator validator;
-    private volatile Duration artificialDelay = Duration.ofMillis(200);
+    private final Duration artificialDelay;
 
-    public ProductCatalogService() {
+    public ProductCatalogService(@Value("${tutorial.backend.artificial-delay:PT0.2S}") Duration artificialDelay) {
+        this.artificialDelay = artificialDelay;
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             this.validator = factory.getValidator();
         }
         generateTestData();
-    }
-
-    public void setArtificialDelay(Duration delay) {
-        this.artificialDelay = Objects.requireNonNull(delay);
-    }
-
-    public Duration getArtificialDelay() {
-        return artificialDelay;
     }
 
     public List<ProductCatalogItem> findItems(Query<ProductFilter, ProductSortProperty> query) {

@@ -35,14 +35,11 @@ class OrderPdfServiceTest {
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService();
-        orderService.setArtificialDelay(Duration.ZERO);
+        orderService = new OrderService(Duration.ZERO);
 
-        customerService = new CustomerService();
-        customerService.setArtificialDelay(Duration.ZERO);
+        customerService = new CustomerService(Duration.ZERO);
 
-        pickupPointService = new PickupPointService();
-        pickupPointService.setArtificialDelay(Duration.ZERO);
+        pickupPointService = new PickupPointService(Duration.ZERO);
 
         pdfService = new OrderPdfService(orderService, customerService, pickupPointService);
     }

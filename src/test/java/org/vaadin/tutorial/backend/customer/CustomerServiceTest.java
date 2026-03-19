@@ -21,8 +21,7 @@ class CustomerServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CustomerService();
-        service.setArtificialDelay(Duration.ZERO);
+        service = new CustomerService(Duration.ZERO);
     }
 
     @Test
