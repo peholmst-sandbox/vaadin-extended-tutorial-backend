@@ -4,6 +4,7 @@ import com.vaadin.flow.function.SerializableFunction;
 import org.vaadin.tutorial.backend.data.Query;
 import org.vaadin.tutorial.backend.data.SortOrder;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public final class VaadinUtils {
@@ -35,7 +36,11 @@ public final class VaadinUtils {
         return new SortOrder<>(sortPropertyMapper.apply(sortOrder.getSorted()), direction);
     }
 
-    public static <F, T> SerializableFunction<F, T> nullAware(SerializableFunction<F, T> mapper) {
+    public static <F, T> SerializableFunction<F, T> mapOrNull(SerializableFunction<F, T> mapper) {
         return from -> from == null ? null : mapper.apply(from);
+    }
+
+    public static <F, T> SerializableFunction<F, T> flatMapOrNull(SerializableFunction<F, Optional<T>> mapper) {
+        return from -> from == null ? null : mapper.apply(from).orElse(null);
     }
 }
