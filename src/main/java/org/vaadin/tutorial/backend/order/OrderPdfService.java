@@ -14,7 +14,6 @@ import org.vaadin.tutorial.backend.pickuppoint.PickupPointService;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.NoSuchElementException;
 
 /**
@@ -155,13 +154,13 @@ public class OrderPdfService {
     }
 
     private void addTotals(Document document, OrderDetails order) throws DocumentException {
-        var subtotal = BigDecimal.ZERO;
-        var totalDiscount = BigDecimal.ZERO;
+        var subtotal = Money.ZERO;
+        var totalDiscount = Money.ZERO;
 
         for (var item : order.getItems()) {
-            subtotal = subtotal.add(item.totalPrice().amount());
+            subtotal = subtotal.add(item.totalPrice());
             if (item.totalDiscount() != null) {
-                totalDiscount = totalDiscount.add(item.totalDiscount().amount());
+                totalDiscount = totalDiscount.add(item.totalDiscount());
             }
         }
 
@@ -171,11 +170,11 @@ public class OrderPdfService {
         totalsTable.setWidthPercentage(40);
         totalsTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-        addTotalRow(totalsTable, "Subtotal:", formatMoney(new Money(subtotal)));
-        if (totalDiscount.compareTo(BigDecimal.ZERO) > 0) {
-            addTotalRow(totalsTable, "Discount:", "-" + formatMoney(new Money(totalDiscount)));
+        addTotalRow(totalsTable, "Subtotal:", formatMoney(subtotal));
+        if (totalDiscount.isPositive()) {
+            addTotalRow(totalsTable, "Discount:", "-" + formatMoney(totalDiscount));
         }
-        addTotalRow(totalsTable, "Total:", formatMoney(new Money(grandTotal)), true);
+        addTotalRow(totalsTable, "Total:", formatMoney(grandTotal), true);
 
         document.add(totalsTable);
     }

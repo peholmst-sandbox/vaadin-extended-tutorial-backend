@@ -27,12 +27,37 @@ public record Money(BigDecimal amount) {
     public static final MathContext MATH_CONTEXT = new MathContext(16, RoundingMode.HALF_EVEN);
 
     /**
+     * A Money instance representing zero.
+     */
+    public static final Money ZERO = new Money(BigDecimal.ZERO);
+
+    /**
      * Creates a new Money instance, normalizing the amount to {@value #SCALE} decimal places.
      *
      * @param amount the monetary amount
      */
     public Money {
         amount = amount.setScale(SCALE, MATH_CONTEXT.getRoundingMode());
+    }
+
+    /**
+     * Adds the given money to this amount.
+     *
+     * @param other the amount to add
+     * @return a new Money instance with the summed amount
+     */
+    public Money add(Money other) {
+        return new Money(amount.add(other.amount, MATH_CONTEXT));
+    }
+
+    /**
+     * Subtracts the given money from this amount.
+     *
+     * @param other the amount to subtract
+     * @return a new Money instance with the difference
+     */
+    public Money subtract(Money other) {
+        return new Money(amount.subtract(other.amount, MATH_CONTEXT));
     }
 
     /**
@@ -43,6 +68,15 @@ public record Money(BigDecimal amount) {
      */
     public Money multiply(int quantity) {
         return new Money(amount.multiply(BigDecimal.valueOf(quantity), MATH_CONTEXT));
+    }
+
+    /**
+     * Returns {@code true} if this amount is strictly greater than zero.
+     *
+     * @return {@code true} if the amount is positive
+     */
+    public boolean isPositive() {
+        return amount.compareTo(BigDecimal.ZERO) > 0;
     }
 
     /**

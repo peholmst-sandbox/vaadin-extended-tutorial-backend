@@ -68,6 +68,42 @@ class MoneyTest {
     }
 
     @Test
+    void zero_isZeroWithCorrectScale() {
+        assertEquals(new BigDecimal("0.00"), Money.ZERO.amount());
+    }
+
+    @Test
+    void add_sumsTwoAmounts() {
+        var a = new Money(new BigDecimal("10.50"));
+        var b = new Money(new BigDecimal("3.25"));
+
+        assertEquals(new Money(new BigDecimal("13.75")), a.add(b));
+    }
+
+    @Test
+    void subtract_subtractsTwoAmounts() {
+        var a = new Money(new BigDecimal("10.50"));
+        var b = new Money(new BigDecimal("3.25"));
+
+        assertEquals(new Money(new BigDecimal("7.25")), a.subtract(b));
+    }
+
+    @Test
+    void isPositive_returnsTrueForPositiveAmount() {
+        assertTrue(new Money(new BigDecimal("0.01")).isPositive());
+    }
+
+    @Test
+    void isPositive_returnsFalseForZero() {
+        assertFalse(Money.ZERO.isPositive());
+    }
+
+    @Test
+    void isPositive_returnsFalseForNegativeAmount() {
+        assertFalse(new Money(new BigDecimal("-1.00")).isPositive());
+    }
+
+    @Test
     void equals_comparesAmounts() {
         var money1 = new Money(new BigDecimal("50.00"));
         var money2 = new Money(new BigDecimal("50"));
