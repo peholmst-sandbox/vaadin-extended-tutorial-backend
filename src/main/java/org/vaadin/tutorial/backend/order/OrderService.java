@@ -18,18 +18,29 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import org.vaadin.tutorial.backend.common.Quantity;
+import org.vaadin.tutorial.backend.customer.CustomerId;
+import org.vaadin.tutorial.backend.pickuppoint.PickupPointId;
+import org.vaadin.tutorial.backend.product.ProductCatalogService;
+import org.vaadin.tutorial.backend.product.ProductFilter;
+import org.vaadin.tutorial.backend.product.ProductSortProperty;
+
 @Service
 public class OrderService extends TutorialBackendService {
 
     private final ConcurrentHashMap<OrderId, OrderDetails> orders = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
     private final Validator validator;
+    private final ProductCatalogService productCatalogService;
 
-    public OrderService(@Value("${tutorial.backend.artificial-delay:PT0.2S}") Duration artificialDelay) {
+    public OrderService(@Value("${tutorial.backend.artificial-delay:PT0.2S}") Duration artificialDelay,
+                        ProductCatalogService productCatalogService) {
         super(artificialDelay);
+        this.productCatalogService = productCatalogService;
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             this.validator = factory.getValidator();
         }
+        generateTestData();
     }
 
     public List<OrderDetails> findAll(Query<OrderFilter, OrderSortProperty> query) {
@@ -132,5 +143,35 @@ public class OrderService extends TutorialBackendService {
             case PICKUP_POINT_ID -> order.getPickupPointId() != null ? order.getPickupPointId().id() : null;
             case ITEM_COUNT -> order.getItems().size();
         };
+    }
+
+    private void generateTestData() {
+        var random = new Random(789);
+        var products = productCatalogService.findItems(
+                new Query<>(null, 0, Integer.MAX_VALUE, List.of()));
+
+        for (int i = 0; i < 200; i++) {
+            var order = new OrderDetails();
+            var id = new OrderId(nextId.getAndIncrement());
+            order.setOrderId(id);
+            order.setVersion(1L);
+            order.setCustomerId(new CustomerId(1 + random.nextInt(100)));
+            order.setPickupPointId(new PickupPointId(1 + random.nextInt(50)));
+
+            int itemCount = 1 + random.nextInt(5);
+            for (int j = 0; j < itemCount; j++) {
+                var product = products.get(random.nextInt(products.size()));
+                var details = productCatalogService.findDetailsById(product.productId()).orElseThrow();
+                order.addItem(new OrderItem(
+                        product.productId(),
+                        product.name(),
+                        product.price(),
+                        details.getDiscount(),
+                        new Quantity(1 + random.nextInt(10))
+                ));
+            }
+
+            orders.put(id, order);
+        }
     }
 }

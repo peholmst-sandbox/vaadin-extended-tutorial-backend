@@ -13,6 +13,8 @@ import org.vaadin.tutorial.backend.order.OrderId;
 import org.vaadin.tutorial.backend.order.OrderItem;
 import org.vaadin.tutorial.backend.order.OrderService;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointId;
+import org.vaadin.tutorial.backend.product.ProductCatalogService;
+import org.vaadin.tutorial.backend.product.ProductCategoryService;
 import org.vaadin.tutorial.backend.product.ProductId;
 
 import java.math.BigDecimal;
@@ -30,7 +32,9 @@ class ShipmentServiceTest {
     @BeforeEach
     void setUp() {
         service = new ShipmentService(Duration.ZERO);
-        orderService = new OrderService(Duration.ZERO);
+        var categoryService = new ProductCategoryService(Duration.ZERO);
+        var productCatalogService = new ProductCatalogService(Duration.ZERO, categoryService);
+        orderService = new OrderService(Duration.ZERO, productCatalogService);
     }
 
     @Test

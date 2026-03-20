@@ -12,6 +12,8 @@ import org.vaadin.tutorial.backend.financial.Money;
 import org.vaadin.tutorial.backend.pickuppoint.GeoCoordinate;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointDetails;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointService;
+import org.vaadin.tutorial.backend.product.ProductCatalogService;
+import org.vaadin.tutorial.backend.product.ProductCategoryService;
 import org.vaadin.tutorial.backend.product.ProductId;
 
 import java.io.IOException;
@@ -35,7 +37,9 @@ class OrderPdfServiceTest {
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(Duration.ZERO);
+        var categoryService = new ProductCategoryService(Duration.ZERO);
+        var productCatalogService = new ProductCatalogService(Duration.ZERO, categoryService);
+        orderService = new OrderService(Duration.ZERO, productCatalogService);
 
         customerService = new CustomerService(Duration.ZERO);
 
