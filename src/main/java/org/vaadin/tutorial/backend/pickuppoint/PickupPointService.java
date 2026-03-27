@@ -1,5 +1,8 @@
 package org.vaadin.tutorial.backend.pickuppoint;
 
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.jspecify.annotations.Nullable;
@@ -7,8 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.vaadin.tutorial.backend.common.TutorialBackendService;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
-import org.vaadin.tutorial.backend.data.Query;
-import org.vaadin.tutorial.backend.data.SortOrder;
 import org.vaadin.tutorial.backend.data.ValidationException;
 import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
@@ -60,19 +61,22 @@ public class PickupPointService extends TutorialBackendService {
         generateTestData();
     }
 
-    public List<PickupPointDetails> findAll(Query<PickupPointFilter, PickupPointSortProperty> query) {
+    public Stream<PickupPointDetails> findAll(Query<PickupPointDetails, PickupPointFilter> query) {
         simulateDelay();
-        return filteredStream(query.filter())
-                .sorted(buildComparator(query.sortOrders()))
-                .skip(query.offset())
-                .limit(query.limit())
-                .map(PickupPointDetails::new)
-                .toList();
+        return filteredStream(query.getFilter().orElse(null))
+                .sorted(buildComparator(query.getSortOrders()))
+                .skip(query.getOffset())
+                .limit(query.getLimit())
+                .map(PickupPointDetails::new);
     }
 
-    public int count(Query<PickupPointFilter, PickupPointSortProperty> query) {
+    public Stream<PickupPointDetails> findAllBySearchTerm(Query<PickupPointDetails, String> query) {
+        return findAll(new Query<>(query.getOffset(), query.getLimit(), query.getSortOrders(), query.getInMemorySorting(), new PickupPointFilter(query.getFilter().orElse(null))));
+    }
+
+    public int count(Query<PickupPointDetails, PickupPointFilter> query) {
         simulateDelay();
-        return (int) filteredStream(query.filter()).count();
+        return (int) filteredStream(query.getFilter().orElse(null)).count();
     }
 
     public Optional<PickupPointDetails> findById(PickupPointId id) {
@@ -140,11 +144,11 @@ public class PickupPointService extends TutorialBackendService {
         return value != null && value.toLowerCase(Locale.ROOT).contains(term);
     }
 
-    private static Comparator<PickupPointDetails> buildComparator(List<SortOrder<PickupPointSortProperty>> sortOrders) {
+    private static Comparator<PickupPointDetails> buildComparator(List<QuerySortOrder> sortOrders) {
         Comparator<PickupPointDetails> comparator = null;
         for (var sortOrder : sortOrders) {
-            Comparator<PickupPointDetails> propertyComparator = propertyComparator(sortOrder.property());
-            if (sortOrder.direction() == SortOrder.Direction.DESCENDING) {
+            Comparator<PickupPointDetails> propertyComparator = propertyComparator(PickupPointSortProperty.valueOf(sortOrder.getSorted()));
+            if (sortOrder.getDirection() == SortDirection.DESCENDING) {
                 propertyComparator = propertyComparator.reversed();
             }
             comparator = comparator == null ? propertyComparator : comparator.thenComparing(propertyComparator);
@@ -157,7 +161,7 @@ public class PickupPointService extends TutorialBackendService {
         return Comparator.comparing(p -> (Comparable<Object>) getProperty(p, property), Comparator.nullsLast(Comparator.naturalOrder()));
     }
 
-    private static Comparable<?> getProperty(PickupPointDetails pickupPoint, PickupPointSortProperty property) {
+    private static @Nullable Comparable<?> getProperty(PickupPointDetails pickupPoint, PickupPointSortProperty property) {
         return switch (property) {
             case NAME -> pickupPoint.getName();
             case CITY -> pickupPoint.getCity();

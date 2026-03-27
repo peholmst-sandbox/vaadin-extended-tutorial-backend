@@ -1,9 +1,9 @@
 package org.vaadin.tutorial.backend.pickuppoint;
 
+import com.vaadin.flow.data.provider.Query;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
-import org.vaadin.tutorial.backend.data.Query;
 import org.vaadin.tutorial.backend.data.ValidationException;
 
 import java.time.Duration;
@@ -160,16 +160,16 @@ class PickupPointServiceTest {
 
     @Test
     void findAll_returnsPickupPoints() {
-        var query = new Query<PickupPointFilter, PickupPointSortProperty>(null, 0, 10, List.of());
+        var query = new Query<PickupPointDetails, PickupPointFilter>(0, 10, List.of(), null, null);
 
-        var pickupPoints = service.findAll(query);
+        var pickupPoints = service.findAll(query).toList();
 
         assertFalse(pickupPoints.isEmpty());
     }
 
     @Test
     void count_returnsCount() {
-        var query = new Query<PickupPointFilter, PickupPointSortProperty>(null, 0, 10, List.of());
+        var query = new Query<PickupPointDetails, PickupPointFilter>(0, 10, List.of(), null, null);
 
         var count = service.count(query);
 
