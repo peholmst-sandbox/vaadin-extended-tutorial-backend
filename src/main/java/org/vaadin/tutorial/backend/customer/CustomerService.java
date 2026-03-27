@@ -1,5 +1,8 @@
 package org.vaadin.tutorial.backend.customer;
 
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.jspecify.annotations.Nullable;
@@ -10,8 +13,6 @@ import org.vaadin.tutorial.backend.common.PhoneNumber;
 import org.vaadin.tutorial.backend.common.TutorialBackendService;
 import org.vaadin.tutorial.backend.data.DataIntegrityViolationException;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
-import org.vaadin.tutorial.backend.data.Query;
-import org.vaadin.tutorial.backend.data.SortOrder;
 import org.vaadin.tutorial.backend.data.ValidationException;
 import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
@@ -52,19 +53,22 @@ public class CustomerService extends TutorialBackendService {
         generateTestData();
     }
 
-    public List<CustomerDetails> findAll(Query<CustomerFilter, CustomerSortProperty> query) {
+    public Stream<CustomerDetails> findAll(Query<CustomerDetails, CustomerFilter> query) {
         simulateDelay();
-        return filteredStream(query.filter())
-                .sorted(buildComparator(query.sortOrders()))
-                .skip(query.offset())
-                .limit(query.limit())
-                .map(CustomerDetails::new)
-                .toList();
+        return filteredStream(query.getFilter().orElse(null))
+                .sorted(buildComparator(query.getSortOrders()))
+                .skip(query.getOffset())
+                .limit(query.getLimit())
+                .map(CustomerDetails::new);
     }
 
-    public int count(Query<CustomerFilter, CustomerSortProperty> query) {
+    public Stream<CustomerDetails> findAllBySearchTerm(Query<CustomerDetails, String> query) {
+        return findAll(new Query<>(query.getOffset(), query.getLimit(), query.getSortOrders(), query.getInMemorySorting(), new CustomerFilter(query.getFilter().orElse(null))));
+    }
+
+    public int count(Query<CustomerDetails, CustomerFilter> query) {
         simulateDelay();
-        return (int) filteredStream(query.filter()).count();
+        return (int) filteredStream(query.getFilter().orElse(null)).count();
     }
 
     public Optional<CustomerDetails> findById(CustomerId id) {
@@ -111,7 +115,7 @@ public class CustomerService extends TutorialBackendService {
             }
             var updated = new CustomerDetails(customerDetails);
             updated.setCustomerId(id);
-            updated.setVersion(existing.getVersion() + 1);
+            updated.setVersion(existing.nextVersion());
             return updated;
         });
         return new CustomerDetails(result);
@@ -146,16 +150,16 @@ public class CustomerService extends TutorialBackendService {
         return value != null && value.toLowerCase(Locale.ROOT).contains(term);
     }
 
-    private static Comparator<CustomerDetails> buildComparator(List<SortOrder<CustomerSortProperty>> sortOrders) {
+    private static Comparator<CustomerDetails> buildComparator(List<QuerySortOrder> sortOrders) {
         Comparator<CustomerDetails> comparator = null;
         for (var sortOrder : sortOrders) {
-            Comparator<CustomerDetails> propertyComparator = propertyComparator(sortOrder.property());
-            if (sortOrder.direction() == SortOrder.Direction.DESCENDING) {
+            Comparator<CustomerDetails> propertyComparator = propertyComparator(CustomerSortProperty.valueOf(sortOrder.getSorted()));
+            if (sortOrder.getDirection() == SortDirection.DESCENDING) {
                 propertyComparator = propertyComparator.reversed();
             }
             comparator = comparator == null ? propertyComparator : comparator.thenComparing(propertyComparator);
         }
-        return comparator != null ? comparator : Comparator.comparing(c -> c.getCustomerId().id());
+        return comparator != null ? comparator : Comparator.comparing(c -> c.requireCustomerId().id());
     }
 
     @SuppressWarnings("unchecked")
@@ -163,7 +167,7 @@ public class CustomerService extends TutorialBackendService {
         return Comparator.comparing(c -> (Comparable<Object>) getProperty(c, property), Comparator.nullsLast(Comparator.naturalOrder()));
     }
 
-    private static Comparable<?> getProperty(CustomerDetails customer, CustomerSortProperty property) {
+    private static @Nullable Comparable<?> getProperty(CustomerDetails customer, CustomerSortProperty property) {
         return switch (property) {
             case FIRST_NAME -> customer.getFirstName();
             case LAST_NAME -> customer.getLastName();

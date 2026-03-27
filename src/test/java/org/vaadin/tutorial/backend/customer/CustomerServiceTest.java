@@ -1,12 +1,12 @@
 package org.vaadin.tutorial.backend.customer;
 
+import com.vaadin.flow.data.provider.Query;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.vaadin.tutorial.backend.common.EmailAddress;
 import org.vaadin.tutorial.backend.common.PhoneNumber;
 import org.vaadin.tutorial.backend.data.DataIntegrityViolationException;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
-import org.vaadin.tutorial.backend.data.Query;
 import org.vaadin.tutorial.backend.data.ValidationException;
 
 import java.time.Duration;
@@ -170,16 +170,16 @@ class CustomerServiceTest {
 
     @Test
     void findAll_returnsCustomers() {
-        var query = new Query<CustomerFilter, CustomerSortProperty>(null, 0, 10, List.of());
+        var query = new Query<CustomerDetails, CustomerFilter>(0, 10, List.of(), null, null);
 
-        var customers = service.findAll(query);
+        var customers = service.findAll(query).toList();
 
         assertFalse(customers.isEmpty());
     }
 
     @Test
     void count_returnsCount() {
-        var query = new Query<CustomerFilter, CustomerSortProperty>(null, 0, 10, List.of());
+        var query = new Query<CustomerDetails, CustomerFilter>(0, 10, List.of(), null, null);
 
         var count = service.count(query);
 

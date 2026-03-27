@@ -8,6 +8,8 @@ import org.vaadin.tutorial.backend.common.PhoneNumber;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointId;
 import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Represents the full details of a customer.
  * <p>
@@ -58,12 +60,20 @@ public class CustomerDetails {
         return customerId;
     }
 
+    public CustomerId requireCustomerId() {
+        return requireNonNull(customerId);
+    }
+
     void setCustomerId(CustomerId customerId) {
         this.customerId = customerId;
     }
 
     public @Nullable Long getVersion() {
         return version;
+    }
+
+    Long nextVersion() {
+        return version == null ? 1 : version + 1;
     }
 
     void setVersion(Long version) {
