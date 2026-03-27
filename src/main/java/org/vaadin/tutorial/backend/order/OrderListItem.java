@@ -14,6 +14,8 @@ public record OrderListItem(
         @Nullable String customerName,
         PickupPointId pickupPointId,
         @Nullable String pickupPointName,
+        @Nullable String pickupPointCity,
+        @Nullable String pickupPointCountry,
         int itemCount,
         Money itemTotal
 ) {

@@ -122,10 +122,8 @@ public class OrderService extends TutorialBackendService {
                         .map(c -> c.getFirstName() + " " + c.getLastName())
                         .orElse(null)
                 : null;
-        var pickupPointName = order.getPickupPointId() != null
-                ? pickupPointService.findById(order.getPickupPointId())
-                        .map(PickupPointDetails::getName)
-                        .orElse(null)
+        var pickupPoint = order.getPickupPointId() != null
+                ? pickupPointService.findById(order.getPickupPointId()).orElse(null)
                 : null;
         var itemTotal = order.getItems().stream()
                 .map(OrderItem::totalPrice)
@@ -136,7 +134,9 @@ public class OrderService extends TutorialBackendService {
                 order.getCustomerId(),
                 customerName,
                 order.getPickupPointId(),
-                pickupPointName,
+                pickupPoint != null ? pickupPoint.getName() : null,
+                pickupPoint != null ? pickupPoint.getCity() : null,
+                pickupPoint != null ? pickupPoint.getCountry() : null,
                 order.getItems().size(),
                 itemTotal
         );
