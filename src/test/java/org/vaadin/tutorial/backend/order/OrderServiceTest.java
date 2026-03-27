@@ -1,11 +1,11 @@
 package org.vaadin.tutorial.backend.order;
 
+import com.vaadin.flow.data.provider.Query;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.vaadin.tutorial.backend.common.Quantity;
 import org.vaadin.tutorial.backend.customer.CustomerId;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
-import org.vaadin.tutorial.backend.data.Query;
 import org.vaadin.tutorial.backend.data.ValidationException;
 import org.vaadin.tutorial.backend.financial.Money;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointId;
@@ -123,7 +123,7 @@ class OrderServiceTest {
         var order = createOrder();
         var saved = service.save(order);
 
-        var found = service.findById(saved.getOrderId());
+        var found = service.findById(saved.requireOrderId());
 
         assertTrue(found.isPresent());
         assertEquals(saved.getOrderId(), found.get().getOrderId());
@@ -139,9 +139,7 @@ class OrderServiceTest {
     @Test
     void findAll_returnsOrders() {
         service.save(createOrder());
-        var query = new Query<OrderFilter, OrderSortProperty>(null, 0, 10, List.of());
-
-        var orders = service.findAll(query);
+        var orders = service.findAll(new Query<>()).toList();
 
         assertFalse(orders.isEmpty());
     }
@@ -158,9 +156,8 @@ class OrderServiceTest {
         service.save(order2);
 
         var filter = new OrderFilter(uniqueCustomerId, null);
-        var query = new Query<OrderFilter, OrderSortProperty>(filter, 0, 10, List.of());
 
-        var orders = service.findAll(query);
+        var orders = service.findAll(new Query<>(filter)).toList();
 
         assertEquals(1, orders.size());
         assertEquals(uniqueCustomerId, orders.get(0).getCustomerId());
@@ -178,9 +175,8 @@ class OrderServiceTest {
         service.save(order2);
 
         var filter = new OrderFilter(null, uniquePickupPointId);
-        var query = new Query<OrderFilter, OrderSortProperty>(filter, 0, 10, List.of());
 
-        var orders = service.findAll(query);
+        var orders = service.findAll(new Query<>(filter)).toList();
 
         assertEquals(1, orders.size());
         assertEquals(uniquePickupPointId, orders.get(0).getPickupPointId());
@@ -188,9 +184,7 @@ class OrderServiceTest {
 
     @Test
     void count_returnsCount() {
-        var query = new Query<OrderFilter, OrderSortProperty>(null, 0, 10, List.of());
-
-        var count = service.count(query);
+        var count = service.count(new Query<>());
 
         assertTrue(count > 0);
     }

@@ -1,5 +1,8 @@
 package org.vaadin.tutorial.backend.order;
 
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.jspecify.annotations.Nullable;
@@ -7,8 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.vaadin.tutorial.backend.common.TutorialBackendService;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
-import org.vaadin.tutorial.backend.data.Query;
-import org.vaadin.tutorial.backend.data.SortOrder;
 import org.vaadin.tutorial.backend.data.ValidationException;
 import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
@@ -22,8 +23,6 @@ import org.vaadin.tutorial.backend.common.Quantity;
 import org.vaadin.tutorial.backend.customer.CustomerId;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointId;
 import org.vaadin.tutorial.backend.product.ProductCatalogService;
-import org.vaadin.tutorial.backend.product.ProductFilter;
-import org.vaadin.tutorial.backend.product.ProductSortProperty;
 
 @Service
 public class OrderService extends TutorialBackendService {
@@ -43,19 +42,18 @@ public class OrderService extends TutorialBackendService {
         generateTestData();
     }
 
-    public List<OrderDetails> findAll(Query<OrderFilter, OrderSortProperty> query) {
+    public Stream<OrderDetails> findAll(Query<OrderDetails, OrderFilter> query) {
         simulateDelay();
-        return filteredStream(query.filter())
-                .sorted(buildComparator(query.sortOrders()))
-                .skip(query.offset())
-                .limit(query.limit())
-                .map(OrderDetails::new)
-                .toList();
+        return filteredStream(query.getFilter().orElse(null))
+                .sorted(buildComparator(query.getSortOrders()))
+                .skip(query.getOffset())
+                .limit(query.getLimit())
+                .map(OrderDetails::new);
     }
 
-    public int count(Query<OrderFilter, OrderSortProperty> query) {
+    public int count(Query<OrderDetails, OrderFilter> query) {
         simulateDelay();
-        return (int) filteredStream(query.filter()).count();
+        return (int) filteredStream(query.getFilter().orElse(null)).count();
     }
 
     public Optional<OrderDetails> findById(OrderId id) {
@@ -100,7 +98,7 @@ public class OrderService extends TutorialBackendService {
             }
             var updated = new OrderDetails(orderDetails);
             updated.setOrderId(id);
-            updated.setVersion(existing.getVersion() + 1);
+            updated.setVersion(existing.nextVersion());
             return updated;
         });
         return new OrderDetails(result);
@@ -119,16 +117,16 @@ public class OrderService extends TutorialBackendService {
         return stream;
     }
 
-    private static Comparator<OrderDetails> buildComparator(List<SortOrder<OrderSortProperty>> sortOrders) {
+    private static Comparator<OrderDetails> buildComparator(List<QuerySortOrder> sortOrders) {
         Comparator<OrderDetails> comparator = null;
         for (var sortOrder : sortOrders) {
-            Comparator<OrderDetails> propertyComparator = propertyComparator(sortOrder.property());
-            if (sortOrder.direction() == SortOrder.Direction.DESCENDING) {
+            Comparator<OrderDetails> propertyComparator = propertyComparator(OrderSortProperty.valueOf(sortOrder.getSorted()));
+            if (sortOrder.getDirection() == SortDirection.DESCENDING) {
                 propertyComparator = propertyComparator.reversed();
             }
             comparator = comparator == null ? propertyComparator : comparator.thenComparing(propertyComparator);
         }
-        return comparator != null ? comparator : Comparator.comparing(o -> o.getOrderId().id());
+        return comparator != null ? comparator : Comparator.comparing(o -> o.requireOrderId().id());
     }
 
     @SuppressWarnings("unchecked")
@@ -136,7 +134,7 @@ public class OrderService extends TutorialBackendService {
         return Comparator.comparing(o -> (Comparable<Object>) getProperty(o, property), Comparator.nullsLast(Comparator.naturalOrder()));
     }
 
-    private static Comparable<?> getProperty(OrderDetails order, OrderSortProperty property) {
+    private static @Nullable Comparable<?> getProperty(OrderDetails order, OrderSortProperty property) {
         return switch (property) {
             case ORDER_ID -> order.getOrderId() != null ? order.getOrderId().id() : null;
             case CUSTOMER_ID -> order.getCustomerId() != null ? order.getCustomerId().id() : null;
@@ -148,7 +146,7 @@ public class OrderService extends TutorialBackendService {
     private void generateTestData() {
         var random = new Random(789);
         var products = productCatalogService.findItems(
-                new Query<>(null, 0, Integer.MAX_VALUE, List.of()));
+                new org.vaadin.tutorial.backend.data.Query<>(null, 0, Integer.MAX_VALUE, List.of()));
 
         for (int i = 0; i < 200; i++) {
             var order = new OrderDetails();

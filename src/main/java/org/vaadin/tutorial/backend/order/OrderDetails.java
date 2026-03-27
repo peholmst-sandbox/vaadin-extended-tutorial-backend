@@ -10,6 +10,8 @@ import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Represents the full details of an order.
  * <p>
@@ -49,6 +51,10 @@ public class OrderDetails {
         this.items = new ArrayList<>(original.items);
     }
 
+    public OrderId requireOrderId() {
+        return requireNonNull(orderId);
+    }
+
     public @Nullable OrderId getOrderId() {
         return orderId;
     }
@@ -59,6 +65,10 @@ public class OrderDetails {
 
     public @Nullable Long getVersion() {
         return version;
+    }
+
+    Long nextVersion() {
+        return version == null ? 1 : version + 1;
     }
 
     void setVersion(Long version) {
@@ -86,7 +96,7 @@ public class OrderDetails {
     }
 
     public void setItems(List<OrderItem> items) {
-        this.items = items != null ? new ArrayList<>(items) : new ArrayList<>();
+        this.items = new ArrayList<>(items);
     }
 
     public void addItem(OrderItem item) {
