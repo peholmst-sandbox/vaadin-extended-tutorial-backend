@@ -14,6 +14,7 @@ import java.util.List;
  * @param limit the maximum number of items to return
  * @param sortOrders the sort orders to apply, in order of precedence
  */
+@Deprecated(forRemoval = true)
 public record Query<F, S>(
         @Nullable F filter,
         int offset,

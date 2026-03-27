@@ -7,6 +7,7 @@ package org.vaadin.tutorial.backend.data;
  * @param property the property to sort by
  * @param direction the sort direction
  */
+@Deprecated(forRemoval = true)
 public record SortOrder<P>(P property, Direction direction) {
 
     /**
