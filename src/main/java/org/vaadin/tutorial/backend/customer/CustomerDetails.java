@@ -96,6 +96,20 @@ public class CustomerDetails {
         this.lastName = lastName;
     }
 
+    public String getFullName() {
+        var sb = new StringBuilder();
+        if (firstName != null && !firstName.isBlank()) {
+            sb.append(firstName);
+        }
+        if (lastName != null && !lastName.isBlank()) {
+            if (!sb.isEmpty()) {
+                sb.append(" ");
+            }
+            sb.append(lastName);
+        }
+        return sb.toString();
+    }
+
     public @Nullable EmailAddress getEmail() {
         return email;
     }

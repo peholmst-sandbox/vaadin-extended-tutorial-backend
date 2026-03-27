@@ -18,6 +18,7 @@ import org.vaadin.tutorial.backend.product.ProductCategoryService;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -159,7 +160,7 @@ class OrderServiceTest {
         order2.setCustomerId(new CustomerId(10002));
         service.save(order2);
 
-        var filter = new OrderFilter(uniqueCustomerId, null);
+        var filter = new OrderFilter(uniqueCustomerId, null, null, null);
 
         var orders = service.findAll(new Query<>(filter)).toList();
 
@@ -178,7 +179,7 @@ class OrderServiceTest {
         order2.setPickupPointId(new PickupPointId(10002));
         service.save(order2);
 
-        var filter = new OrderFilter(null, uniquePickupPointId);
+        var filter = new OrderFilter(null, uniquePickupPointId, null, null);
 
         var orders = service.findAll(new Query<>(filter)).toList();
 
@@ -195,6 +196,7 @@ class OrderServiceTest {
 
     private OrderDetails createOrder() {
         var order = new OrderDetails();
+        order.setOrderDate(LocalDate.now());
         order.setCustomerId(new CustomerId(1));
         order.setPickupPointId(new PickupPointId(1));
         order.addItem(createOrderItem(new ProductId(1), "Test Product"));

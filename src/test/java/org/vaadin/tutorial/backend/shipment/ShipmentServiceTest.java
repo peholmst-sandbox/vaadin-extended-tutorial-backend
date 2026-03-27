@@ -316,6 +316,7 @@ class ShipmentServiceTest {
 
     private OrderDetails createAndSaveOrder(OrderItem... items) {
         var order = new OrderDetails();
+        order.setOrderDate(java.time.LocalDate.now());
         order.setCustomerId(new CustomerId(1));
         order.setPickupPointId(new PickupPointId(1));
         for (var item : items) {

@@ -14,6 +14,7 @@ import org.vaadin.tutorial.backend.data.ValidationException;
 import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -131,6 +132,7 @@ public class OrderService extends TutorialBackendService {
                 .reduce(Money.ZERO, Money::add);
         return new OrderListItem(
                 order.requireOrderId(),
+                order.getOrderDate(),
                 order.getCustomerId(),
                 customerName,
                 order.getPickupPointId(),
@@ -148,6 +150,12 @@ public class OrderService extends TutorialBackendService {
             }
             if (filter.pickupPointId() != null) {
                 stream = stream.filter(o -> filter.pickupPointId().equals(o.getPickupPointId()));
+            }
+            if (filter.orderDateFrom() != null) {
+                stream = stream.filter(o -> o.getOrderDate() != null && !o.getOrderDate().isBefore(filter.orderDateFrom()));
+            }
+            if (filter.orderDateTo() != null) {
+                stream = stream.filter(o -> o.getOrderDate() != null && !o.getOrderDate().isAfter(filter.orderDateTo()));
             }
         }
         return stream;
@@ -173,6 +181,7 @@ public class OrderService extends TutorialBackendService {
     private static @Nullable Comparable<?> getProperty(OrderDetails order, OrderSortProperty property) {
         return switch (property) {
             case ORDER_ID -> order.getOrderId() != null ? order.getOrderId().id() : null;
+            case ORDER_DATE -> order.getOrderDate();
             case CUSTOMER_ID -> order.getCustomerId() != null ? order.getCustomerId().id() : null;
             case PICKUP_POINT_ID -> order.getPickupPointId() != null ? order.getPickupPointId().id() : null;
             case ITEM_COUNT -> order.getItems().size();
@@ -184,11 +193,13 @@ public class OrderService extends TutorialBackendService {
         var products = productCatalogService.findItems(
                 new org.vaadin.tutorial.backend.data.Query<>(null, 0, Integer.MAX_VALUE, List.of()));
 
+        var today = LocalDate.now();
         for (int i = 0; i < 200; i++) {
             var order = new OrderDetails();
             var id = new OrderId(nextId.getAndIncrement());
             order.setOrderId(id);
             order.setVersion(1L);
+            order.setOrderDate(today.minusDays(random.nextInt(365)));
             order.setCustomerId(new CustomerId(1 + random.nextInt(100)));
             order.setPickupPointId(new PickupPointId(1 + random.nextInt(50)));
 

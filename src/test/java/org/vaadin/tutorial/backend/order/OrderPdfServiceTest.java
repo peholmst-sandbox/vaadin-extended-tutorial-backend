@@ -67,6 +67,7 @@ class OrderPdfServiceTest {
 
         // Create order with multiple items
         var order = new OrderDetails();
+        order.setOrderDate(java.time.LocalDate.now());
         order.setCustomerId(savedCustomer.getCustomerId());
         order.setPickupPointId(savedPickupPoint.getPickupPointId());
         order.addItem(new OrderItem(

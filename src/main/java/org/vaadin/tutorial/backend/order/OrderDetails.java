@@ -7,6 +7,7 @@ import org.vaadin.tutorial.backend.customer.CustomerId;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointId;
 import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,12 +25,15 @@ import static java.util.Objects.requireNonNull;
  *       {@code version} are assigned by the service.</li>
  * </ul>
  * <p>
- * Required fields: customerId, pickupPointId, items (at least one).
+ * Required fields: orderDate, customerId, pickupPointId, items (at least one).
  */
 public class OrderDetails {
 
     private @Nullable OrderId orderId;
     private @Nullable Long version;
+
+    @NotNull(groups = OnSave.class, message = "Order date is required")
+    private @Nullable LocalDate orderDate;
 
     @NotNull(groups = OnSave.class, message = "Customer is required")
     private @Nullable CustomerId customerId;
@@ -46,6 +50,7 @@ public class OrderDetails {
     public OrderDetails(OrderDetails original) {
         this.orderId = original.orderId;
         this.version = original.version;
+        this.orderDate = original.orderDate;
         this.customerId = original.customerId;
         this.pickupPointId = original.pickupPointId;
         this.items = new ArrayList<>(original.items);
@@ -73,6 +78,14 @@ public class OrderDetails {
 
     void setVersion(Long version) {
         this.version = version;
+    }
+
+    public @Nullable LocalDate getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(@Nullable LocalDate orderDate) {
+        this.orderDate = orderDate;
     }
 
     public @Nullable CustomerId getCustomerId() {
