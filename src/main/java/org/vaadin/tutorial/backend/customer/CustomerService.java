@@ -136,14 +136,24 @@ public class CustomerService extends TutorialBackendService {
         var stream = customers.values().stream();
         if (filter != null && filter.searchTerm() != null && !filter.searchTerm().isBlank()) {
             var term = filter.searchTerm().toLowerCase(Locale.ROOT);
+            var termAsId = parseAsLong(term);
             stream = stream.filter(c ->
-                    contains(c.getFirstName(), term)
+                    (termAsId != null && c.getCustomerId() != null && c.getCustomerId().id() == termAsId)
+                            || contains(c.getFirstName(), term)
                             || contains(c.getLastName(), term)
                             || contains(c.getEmail() != null ? c.getEmail().value() : null, term)
                             || contains(c.getPhone() != null ? c.getPhone().value() : null, term)
             );
         }
         return stream;
+    }
+
+    private static @Nullable Long parseAsLong(String value) {
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private static boolean contains(@Nullable String value, String term) {
