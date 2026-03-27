@@ -57,10 +57,10 @@ public class OrderService extends TutorialBackendService {
     public Stream<OrderListItem> findAll(Query<OrderListItem, OrderFilter> query) {
         simulateDelay();
         return filteredStream(query.getFilter().orElse(null))
+                .map(this::toListItem)
                 .sorted(buildComparator(query.getSortOrders()))
                 .skip(query.getOffset())
-                .limit(query.getLimit())
-                .map(this::toListItem);
+                .limit(query.getLimit());
     }
 
     public int count(Query<OrderListItem, OrderFilter> query) {
@@ -161,30 +161,34 @@ public class OrderService extends TutorialBackendService {
         return stream;
     }
 
-    private static Comparator<OrderDetails> buildComparator(List<QuerySortOrder> sortOrders) {
-        Comparator<OrderDetails> comparator = null;
+    private static Comparator<OrderListItem> buildComparator(List<QuerySortOrder> sortOrders) {
+        Comparator<OrderListItem> comparator = null;
         for (var sortOrder : sortOrders) {
-            Comparator<OrderDetails> propertyComparator = propertyComparator(OrderSortProperty.valueOf(sortOrder.getSorted()));
+            Comparator<OrderListItem> propertyComparator = propertyComparator(OrderSortProperty.valueOf(sortOrder.getSorted()));
             if (sortOrder.getDirection() == SortDirection.DESCENDING) {
                 propertyComparator = propertyComparator.reversed();
             }
             comparator = comparator == null ? propertyComparator : comparator.thenComparing(propertyComparator);
         }
-        return comparator != null ? comparator : Comparator.comparing(o -> o.requireOrderId().id());
+        return comparator != null ? comparator : Comparator.comparing(o -> o.orderId().id());
     }
 
     @SuppressWarnings("unchecked")
-    private static Comparator<OrderDetails> propertyComparator(OrderSortProperty property) {
+    private static Comparator<OrderListItem> propertyComparator(OrderSortProperty property) {
         return Comparator.comparing(o -> (Comparable<Object>) getProperty(o, property), Comparator.nullsLast(Comparator.naturalOrder()));
     }
 
-    private static @Nullable Comparable<?> getProperty(OrderDetails order, OrderSortProperty property) {
+    private static @Nullable Comparable<?> getProperty(OrderListItem item, OrderSortProperty property) {
         return switch (property) {
-            case ORDER_ID -> order.getOrderId() != null ? order.getOrderId().id() : null;
-            case ORDER_DATE -> order.getOrderDate();
-            case CUSTOMER_ID -> order.getCustomerId() != null ? order.getCustomerId().id() : null;
-            case PICKUP_POINT_ID -> order.getPickupPointId() != null ? order.getPickupPointId().id() : null;
-            case ITEM_COUNT -> order.getItems().size();
+            case ORDER_ID -> item.orderId().id();
+            case ORDER_DATE -> item.orderDate();
+            case CUSTOMER_ID -> item.customerId() != null ? item.customerId().id() : null;
+            case CUSTOMER_NAME -> item.customerName();
+            case PICKUP_POINT_ID -> item.pickupPointId() != null ? item.pickupPointId().id() : null;
+            case PICKUP_POINT_NAME -> item.pickupPointName();
+            case PICKUP_POINT_CITY -> item.pickupPointCity();
+            case PICKUP_POINT_COUNTRY -> item.pickupPointCountry();
+            case ITEM_COUNT -> item.itemCount();
         };
     }
 
