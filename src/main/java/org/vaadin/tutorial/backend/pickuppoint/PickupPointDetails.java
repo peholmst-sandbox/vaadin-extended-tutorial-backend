@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.vaadin.tutorial.backend.validation.ValidationGroups.OnSave;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Represents the full details of a pickup point.
  * <p>
@@ -56,12 +58,20 @@ public class PickupPointDetails {
         return pickupPointId;
     }
 
+    public PickupPointId requirePickupPointId() {
+        return requireNonNull(pickupPointId);
+    }
+
     void setPickupPointId(PickupPointId pickupPointId) {
         this.pickupPointId = pickupPointId;
     }
 
     public @Nullable Long getVersion() {
         return version;
+    }
+
+    Long nextVersion() {
+        return version == null ? 1 : version + 1;
     }
 
     void setVersion(Long version) {

@@ -121,7 +121,7 @@ public class PickupPointService extends TutorialBackendService {
             }
             var updated = new PickupPointDetails(pickupPointDetails);
             updated.setPickupPointId(id);
-            updated.setVersion(existing.getVersion() + 1);
+            updated.setVersion(existing.nextVersion());
             return updated;
         });
         return new PickupPointDetails(result);
@@ -153,7 +153,7 @@ public class PickupPointService extends TutorialBackendService {
             }
             comparator = comparator == null ? propertyComparator : comparator.thenComparing(propertyComparator);
         }
-        return comparator != null ? comparator : Comparator.comparing(p -> p.getPickupPointId().id());
+        return comparator != null ? comparator : Comparator.comparing(p -> p.requirePickupPointId().id());
     }
 
     @SuppressWarnings("unchecked")
