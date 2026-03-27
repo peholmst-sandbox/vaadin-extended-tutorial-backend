@@ -5,10 +5,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.vaadin.tutorial.backend.common.Quantity;
 import org.vaadin.tutorial.backend.customer.CustomerId;
+import org.vaadin.tutorial.backend.customer.CustomerService;
 import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.ValidationException;
 import org.vaadin.tutorial.backend.financial.Money;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointId;
+import org.vaadin.tutorial.backend.pickuppoint.PickupPointService;
 import org.vaadin.tutorial.backend.product.ProductId;
 
 import org.vaadin.tutorial.backend.product.ProductCatalogService;
@@ -29,7 +31,9 @@ class OrderServiceTest {
     void setUp() {
         var categoryService = new ProductCategoryService(Duration.ZERO);
         var productCatalogService = new ProductCatalogService(Duration.ZERO, categoryService);
-        service = new OrderService(Duration.ZERO, productCatalogService);
+        var customerService = new CustomerService(Duration.ZERO);
+        var pickupPointService = new PickupPointService(Duration.ZERO);
+        service = new OrderService(Duration.ZERO, customerService, pickupPointService, productCatalogService);
     }
 
     @Test
@@ -160,7 +164,7 @@ class OrderServiceTest {
         var orders = service.findAll(new Query<>(filter)).toList();
 
         assertEquals(1, orders.size());
-        assertEquals(uniqueCustomerId, orders.get(0).getCustomerId());
+        assertEquals(uniqueCustomerId, orders.get(0).customerId());
     }
 
     @Test
@@ -179,7 +183,7 @@ class OrderServiceTest {
         var orders = service.findAll(new Query<>(filter)).toList();
 
         assertEquals(1, orders.size());
-        assertEquals(uniquePickupPointId, orders.get(0).getPickupPointId());
+        assertEquals(uniquePickupPointId, orders.get(0).pickupPointId());
     }
 
     @Test

@@ -39,11 +39,9 @@ class OrderPdfServiceTest {
     void setUp() {
         var categoryService = new ProductCategoryService(Duration.ZERO);
         var productCatalogService = new ProductCatalogService(Duration.ZERO, categoryService);
-        orderService = new OrderService(Duration.ZERO, productCatalogService);
-
         customerService = new CustomerService(Duration.ZERO);
-
         pickupPointService = new PickupPointService(Duration.ZERO);
+        orderService = new OrderService(Duration.ZERO, customerService, pickupPointService, productCatalogService);
 
         pdfService = new OrderPdfService(orderService, customerService, pickupPointService);
     }

@@ -20,8 +20,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import org.vaadin.tutorial.backend.common.Quantity;
+import org.vaadin.tutorial.backend.customer.CustomerDetails;
 import org.vaadin.tutorial.backend.customer.CustomerId;
+import org.vaadin.tutorial.backend.customer.CustomerService;
+import org.vaadin.tutorial.backend.financial.Money;
+import org.vaadin.tutorial.backend.pickuppoint.PickupPointDetails;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointId;
+import org.vaadin.tutorial.backend.pickuppoint.PickupPointService;
 import org.vaadin.tutorial.backend.product.ProductCatalogService;
 
 @Service
@@ -30,11 +35,17 @@ public class OrderService extends TutorialBackendService {
     private final ConcurrentHashMap<OrderId, OrderDetails> orders = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
     private final Validator validator;
+    private final CustomerService customerService;
+    private final PickupPointService pickupPointService;
     private final ProductCatalogService productCatalogService;
 
     public OrderService(@Value("${tutorial.backend.artificial-delay:PT0.2S}") Duration artificialDelay,
+                        CustomerService customerService,
+                        PickupPointService pickupPointService,
                         ProductCatalogService productCatalogService) {
         super(artificialDelay);
+        this.customerService = customerService;
+        this.pickupPointService = pickupPointService;
         this.productCatalogService = productCatalogService;
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             this.validator = factory.getValidator();
@@ -42,16 +53,16 @@ public class OrderService extends TutorialBackendService {
         generateTestData();
     }
 
-    public Stream<OrderDetails> findAll(Query<OrderDetails, OrderFilter> query) {
+    public Stream<OrderListItem> findAll(Query<OrderListItem, OrderFilter> query) {
         simulateDelay();
         return filteredStream(query.getFilter().orElse(null))
                 .sorted(buildComparator(query.getSortOrders()))
                 .skip(query.getOffset())
                 .limit(query.getLimit())
-                .map(OrderDetails::new);
+                .map(this::toListItem);
     }
 
-    public int count(Query<OrderDetails, OrderFilter> query) {
+    public int count(Query<OrderListItem, OrderFilter> query) {
         simulateDelay();
         return (int) filteredStream(query.getFilter().orElse(null)).count();
     }
@@ -102,6 +113,31 @@ public class OrderService extends TutorialBackendService {
             return updated;
         });
         return new OrderDetails(result);
+    }
+
+    private OrderListItem toListItem(OrderDetails order) {
+        var customerName = order.getCustomerId() != null
+                ? customerService.findById(order.getCustomerId())
+                        .map(c -> c.getFirstName() + " " + c.getLastName())
+                        .orElse(null)
+                : null;
+        var pickupPointName = order.getPickupPointId() != null
+                ? pickupPointService.findById(order.getPickupPointId())
+                        .map(PickupPointDetails::getName)
+                        .orElse(null)
+                : null;
+        var itemTotal = order.getItems().stream()
+                .map(OrderItem::totalPrice)
+                .reduce(Money.ZERO, Money::add);
+        return new OrderListItem(
+                order.requireOrderId(),
+                order.getCustomerId(),
+                customerName,
+                order.getPickupPointId(),
+                pickupPointName,
+                order.getItems().size(),
+                itemTotal
+        );
     }
 
     private Stream<OrderDetails> filteredStream(@Nullable OrderFilter filter) {

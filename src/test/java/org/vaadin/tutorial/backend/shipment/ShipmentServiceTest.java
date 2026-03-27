@@ -8,11 +8,13 @@ import org.vaadin.tutorial.backend.data.OptimisticLockingFailureException;
 import org.vaadin.tutorial.backend.data.Query;
 import org.vaadin.tutorial.backend.data.ValidationException;
 import org.vaadin.tutorial.backend.financial.Money;
+import org.vaadin.tutorial.backend.customer.CustomerService;
 import org.vaadin.tutorial.backend.order.OrderDetails;
 import org.vaadin.tutorial.backend.order.OrderId;
 import org.vaadin.tutorial.backend.order.OrderItem;
 import org.vaadin.tutorial.backend.order.OrderService;
 import org.vaadin.tutorial.backend.pickuppoint.PickupPointId;
+import org.vaadin.tutorial.backend.pickuppoint.PickupPointService;
 import org.vaadin.tutorial.backend.product.ProductCatalogService;
 import org.vaadin.tutorial.backend.product.ProductCategoryService;
 import org.vaadin.tutorial.backend.product.ProductId;
@@ -34,7 +36,9 @@ class ShipmentServiceTest {
         service = new ShipmentService(Duration.ZERO);
         var categoryService = new ProductCategoryService(Duration.ZERO);
         var productCatalogService = new ProductCatalogService(Duration.ZERO, categoryService);
-        orderService = new OrderService(Duration.ZERO, productCatalogService);
+        var customerService = new CustomerService(Duration.ZERO);
+        var pickupPointService = new PickupPointService(Duration.ZERO);
+        orderService = new OrderService(Duration.ZERO, customerService, pickupPointService, productCatalogService);
     }
 
     @Test
