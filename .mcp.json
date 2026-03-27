@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "Vaadin": {
+      "type": "http",
+      "url": "https://mcp.vaadin.com/docs"
+    },
+    "java": {
+      "type": "http",
+      "url": "https://www.javadocs.dev/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--browser", "chromium",
+        "--executable-path", "/usr/bin/chromium-browser"
+      ]
+    },
+    "spring-docs": {
+      "command": "npx",
+      "args": ["-y", "@enokdev/springdocs-mcp@latest"]
+    }
+  }
+}
