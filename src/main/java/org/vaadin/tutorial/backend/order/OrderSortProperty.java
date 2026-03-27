@@ -9,5 +9,6 @@ public enum OrderSortProperty {
     PICKUP_POINT_NAME,
     PICKUP_POINT_CITY,
     PICKUP_POINT_COUNTRY,
-    ITEM_COUNT
+    ITEM_COUNT,
+    ITEM_TOTAL
 }

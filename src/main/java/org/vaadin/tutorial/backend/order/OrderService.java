@@ -189,6 +189,7 @@ public class OrderService extends TutorialBackendService {
             case PICKUP_POINT_CITY -> item.pickupPointCity();
             case PICKUP_POINT_COUNTRY -> item.pickupPointCountry();
             case ITEM_COUNT -> item.itemCount();
+            case ITEM_TOTAL -> item.itemTotal().amount();
         };
     }
 
