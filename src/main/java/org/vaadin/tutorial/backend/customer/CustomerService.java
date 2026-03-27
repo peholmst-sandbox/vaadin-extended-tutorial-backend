@@ -135,15 +135,20 @@ public class CustomerService extends TutorialBackendService {
     private Stream<CustomerDetails> filteredStream(@Nullable CustomerFilter filter) {
         var stream = customers.values().stream();
         if (filter != null && filter.searchTerm() != null && !filter.searchTerm().isBlank()) {
-            var term = filter.searchTerm().toLowerCase(Locale.ROOT);
-            var termAsId = parseAsLong(term);
-            stream = stream.filter(c ->
-                    (termAsId != null && c.getCustomerId() != null && c.getCustomerId().id() == termAsId)
-                            || contains(c.getFirstName(), term)
-                            || contains(c.getLastName(), term)
-                            || contains(c.getEmail() != null ? c.getEmail().value() : null, term)
-                            || contains(c.getPhone() != null ? c.getPhone().value() : null, term)
-            );
+            var words = filter.searchTerm().toLowerCase(Locale.ROOT).split("\\s+");
+            stream = stream.filter(c -> {
+                for (var word : words) {
+                    var wordAsId = parseAsLong(word);
+                    if ((wordAsId != null && c.getCustomerId() != null && c.getCustomerId().id() == wordAsId)
+                            || contains(c.getFirstName(), word)
+                            || contains(c.getLastName(), word)
+                            || contains(c.getEmail() != null ? c.getEmail().value() : null, word)
+                            || contains(c.getPhone() != null ? c.getPhone().value() : null, word)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
         }
         return stream;
     }
